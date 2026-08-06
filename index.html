@@ -117,7 +117,12 @@ tailwind.config = { theme: { extend: {
       <svg id="wheelSvg" class="wheel-svg" viewBox="0 0 240 240" aria-hidden="true"></svg>
       <div class="wheel-hub"><i class="fa-solid fa-dna"></i></div>
     </div>
-    <p id="wheelCaption" class="text-[11px] text-slate-500 mb-4">환경 룰렛을 돌립니다</p>
+    <div class="flex items-center justify-center gap-3 mb-1.5 text-[11px] font-semibold">
+      <span class="flex items-center gap-1.5 text-emerald-400"><span class="w-3 h-3 rounded-sm" style="background:#10b98142;border:1px solid #10b981b3"></span>번성</span>
+      <span class="flex items-center gap-1.5 text-amber-400"><span class="w-3 h-3 rounded-sm" style="background:#f59e0b42;border:1px solid #f59e0bb3"></span>생존</span>
+      <span class="flex items-center gap-1.5 text-rose-400"><span class="w-3 h-3 rounded-sm" style="background:#ef444442;border:1px solid #ef4444b3"></span>멸종</span>
+    </div>
+    <p id="wheelCaption" class="text-[11px] text-slate-500 mb-4 text-center px-4">칸 색은 이 형질이 그 환경에서 받을 판정입니다</p>
 
     <div id="envResult" class="w-full max-w-[17rem] mb-5 rounded-2xl border p-3.5 flex items-center gap-3 text-left opacity-0 transition-opacity duration-500">
       <i id="envIcon" class="fa-solid text-3xl shrink-0 w-10 text-center"></i>
@@ -276,6 +281,7 @@ tailwind.config = { theme: { extend: {
           카드 아래에 이번 세대의 후보 환경이 적혀 있습니다.
           형질을 고르고 나면 그 후보들로 룰렛이 돌아가고,
           바늘이 선 칸이 실제로 닥칠 환경이 됩니다.
+          칸 색은 <span class="text-slate-200 font-semibold">고른 형질이 그 환경에서 받을 판정</span>입니다.
         </p>
         <div class="mt-6 w-full max-w-xs space-y-2 text-left">
           <div class="flex items-center gap-3 bg-emerald-500/10 border border-emerald-500/30 rounded-xl px-3 py-2">
@@ -608,7 +614,7 @@ function choose(side){
   const env=n.envs[Math.floor(rng()*n.envs.length)];
   const cell=n.pay[ch.trait] && n.pay[ch.trait][env];
   if(!cell){ console.error('페이오프 누락',node,ch.trait,env); render(node); return; }
-  pending={node,trait:ch.trait,label:ch.label,env,envs:n.envs,cell};
+  pending={node,trait:ch.trait,label:ch.label,env,envs:n.envs,pay:n.pay[ch.trait],cell};
   seen.add(`${node}|${ch.trait}|${env}`);
   runEdges.add(`${node}|${ch.trait}|${cell.to}`);
   log.push({node:n.title,trait:ch.label,env:ENV[env].n,verdict:VERDICT[cell.v].n,seed});
@@ -628,32 +634,45 @@ const after=(ms,fn)=>evTimers.push(setTimeout(fn,ms));
 const whPt=(deg,r)=>[(WH_C+r*Math.sin(deg*Math.PI/180)).toFixed(2),
                      (WH_C-r*Math.cos(deg*Math.PI/180)).toFixed(2)];
 
+/* 칸 색 = 「이미 고른 형질」이 그 환경에서 받는 판정.
+   초록 번성 · 노랑 생존 · 빨강 멸종. 돌기 전에 판이 통째로 읽힌다.
+   무엇이 걸리느냐만 남기고, 걸리면 어떻게 되는지는 미리 보여준다. */
+const whVerdict=(pay,id)=>pay&&pay[id]?VERDICT[pay[id].v]:null;
+
 /* 이름이 길면 마지막 띄어쓰기에서 두 줄로 접는다 */
-function whLabel(name){
+function whLines(name){
   const i=name.length>5?name.lastIndexOf(' '):-1;
-  const lines=i<0?[name]:[name.slice(0,i),name.slice(i+1)];
-  const y0=lines.length>1?-3:5;
-  return lines.map((s,k)=>`<tspan x="0" y="${y0+k*16}">${s}</tspan>`).join('');
+  return i<0?[name]:[name.slice(0,i),name.slice(i+1)];
 }
 
-function buildWheel(envs){
+function buildWheel(envs,pay){
   const seg=360/envs.length, big=seg>180?1:0;
+  /* 반투명 색을 배경 위에 바로 얹으면 노랑이 갈색으로 죽는다.
+     불투명한 바탕을 깔고 진한 색을 올린 뒤, 칸 사이를 배경색 선으로 끊는다.
+     같은 판정이 나란히 와도 두 칸으로 보여야 한다. */
+  const base=`<circle cx="${WH_C}" cy="${WH_C}" r="${WH_R}" fill="#0f172a"/>`;
   const wedges=envs.map((id,i)=>{
-    const e=ENV[id], col=HEX[e.c]||'#10b981';
+    const V=whVerdict(pay,id), col=V?HEX[V.c]:'#64748b';
     const [x1,y1]=whPt(i*seg,WH_R), [x2,y2]=whPt((i+1)*seg,WH_R);
     return `<path id="wseg${i}" d="M${WH_C},${WH_C} L${x1},${y1} A${WH_R},${WH_R} 0 ${big},1 ${x2},${y2} Z"
-        fill="${col}2e" stroke="${col}8c" stroke-width="2" style="transition:fill .4s,stroke .4s,opacity .4s"/>`;
+        fill="${col}b8" stroke="#0f172a" stroke-width="3" stroke-linejoin="round"
+        style="transition:fill .4s,stroke .4s,opacity .4s"/>`;
   }).join('');
   const labels=envs.map((id,i)=>{
-    const e=ENV[id], col=HEX[e.c]||'#10b981';
-    const [lx,ly]=whPt((i+.5)*seg,WH_R*.62);
+    const V=whVerdict(pay,id);
+    const lines=whLines(ENV[id].n);
+    const y0=12-(lines.length*16+18)/2;
+    const [lx,ly]=whPt((i+.5)*seg,WH_R*.6);
     return `<g id="wlab${i}" transform="translate(${lx},${ly})" style="transition:opacity .4s">
       <g class="wtxt" style="transform:rotate(${-wheelRot}deg)">
-        <text text-anchor="middle" font-size="13" font-weight="700" fill="${col}"
-              style="font-family:Pretendard,sans-serif">${whLabel(e.n)}</text>
+        <text text-anchor="middle" font-size="13" font-weight="800" fill="#0b1120"
+              style="font-family:Pretendard,sans-serif">${
+          lines.map((s,k)=>`<tspan x="0" y="${y0+k*16}">${s}</tspan>`).join('')}</text>
+        ${V?`<text x="0" y="${y0+lines.length*16+3}" text-anchor="middle" font-size="11" font-weight="800"
+              fill="#0b1120" opacity=".72" style="font-family:Pretendard,sans-serif">${V.n}</text>`:''}
       </g></g>`;
   }).join('');
-  return wedges+labels
+  return base+wedges+labels
     +`<circle cx="${WH_C}" cy="${WH_C}" r="${WH_R+2}" fill="none" stroke="#475569" stroke-width="3"/>`;
 }
 
@@ -678,26 +697,26 @@ function markWinner(idx,count,col){
   for(let i=0;i<count;i++){
     const s=$('wseg'+i), g=$('wlab'+i);
     if(!s) continue;
-    if(i===idx){ s.setAttribute('fill',col+'59'); s.setAttribute('stroke',col); s.setAttribute('stroke-width','3'); }
-    else { s.style.opacity='.22'; if(g) g.style.opacity='.22'; }
+    if(i===idx){ s.setAttribute('fill',col); s.setAttribute('stroke','#f8fafc'); s.setAttribute('stroke-width','3.5'); }
+    else { s.style.opacity='.26'; if(g) g.style.opacity='.26'; }
   }
 }
 
 function showEvent(){
-  const {label,env,envs,cell}=pending, e=ENV[env], col=HEX[e.c]||'#10b981';
+  const {label,env,envs,pay,cell}=pending, e=ENV[env];
   const idx=envs.indexOf(env);
+  const V=VERDICT[cell.v], vc=HEX[V.c];     // 원판부터 결과 카드까지 같은 색으로 간다
   $('evTrait').textContent=label;
   $('envIcon').className=`fa-solid ${e.i} text-3xl shrink-0 w-10 text-center`;
-  $('envIcon').style.color=col;
-  $('envName').textContent=e.n; $('envName').style.color=col;
+  $('envIcon').style.color=vc;
+  $('envName').textContent=e.n; $('envName').style.color=vc;
   $('envDesc').textContent=e.d;
   const res=$('envResult');
   res.style.opacity='0';
-  res.style.borderColor=col+'66';
-  res.style.background=col+'1a';
+  res.style.borderColor=vc+'66';
+  res.style.background=vc+'1a';
 
   const vb=$('verdictBox'); vb.style.opacity='0';
-  const V=VERDICT[cell.v], vc=HEX[V.c];
   $('verdictTag').textContent=V.n;
   $('verdictTag').style.cssText=`background:${vc}26;color:${vc};border:1px solid ${vc}4d`;
   $('verdictNote').textContent=cell.note;
@@ -711,10 +730,10 @@ function showEvent(){
   clearEvTimers();
   const wrap=$('wheelWrap'), w=$('wheelSvg');
   w.style.transition='none';
-  w.innerHTML=buildWheel(envs);
+  w.innerHTML=buildWheel(envs,pay);
   void w.getBoundingClientRect();
   wrap.classList.add('wheel-spinning');
-  $('wheelCaption').textContent='환경 룰렛을 돌립니다';
+  $('wheelCaption').textContent='칸 색은 이 형질이 그 환경에서 받을 판정입니다';
 
   const m=$('eventModal'); m.classList.remove('hidden'); m.classList.add('flex');
 
@@ -722,7 +741,7 @@ function showEvent(){
   after(REDUCE?160:220+WH_SPIN+60,()=>{
     wrap.classList.remove('wheel-spinning');
     $('wheelCaption').textContent='바늘이 선 칸이 이번 세대의 환경입니다';
-    markWinner(idx,envs.length,col);
+    markWinner(idx,envs.length,vc);
     res.style.opacity='1';
   });
   after(REDUCE?360:220+WH_SPIN+520,()=>vb.style.opacity='1');
