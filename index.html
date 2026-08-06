@@ -1,0 +1,1045 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EVO SWIPE — 형질 × 환경</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" rel="stylesheet">
+<script>
+tailwind.config = { theme: { extend: {
+  fontFamily: { sans: ['Pretendard','sans-serif'] },
+  colors: { evoDark:'#0f172a', evoCard:'#1e293b', thrive:'#10b981', survive:'#f59e0b', perish:'#ef4444' }
+}}}
+</script>
+<style>
+  html,body{overscroll-behavior-x:none;overflow-x:hidden;max-width:100%;position:relative}
+  body{font-family:'Pretendard',sans-serif;background:radial-gradient(circle at 50% 0%,#1e293b 0%,#0f172a 70%);user-select:none;-webkit-user-select:none}
+  .glass{background:rgba(30,41,59,.85);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.1)}
+  .swipe-card{transition:transform .1s ease-out;will-change:transform;cursor:grab;touch-action:pan-y}
+  .swipe-card:active{cursor:grabbing}
+  .swipe-card.anim{transition:transform .35s ease-out,opacity .35s ease-out}
+  .badge{opacity:0;transition:opacity .15s ease}
+  /* 환경 카드 플립 — 이 게임의 시그니처 순간 */
+  .flip{perspective:900px}
+  .flip-inner{position:relative;width:100%;height:100%;transform-style:preserve-3d;transition:transform .7s cubic-bezier(.4,.2,.2,1)}
+  .flip.revealed .flip-inner{transform:rotateY(180deg)}
+  .flip-face{position:absolute;inset:0;backface-visibility:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:1.5rem}
+  .flip-back{transform:rotateY(180deg)}
+  .dice-dot{animation:pulse 1s infinite}
+  @keyframes pulse{0%,100%{opacity:.3}50%{opacity:1}}
+  /* 튜토리얼 실습 카드 — 미는 동작을 손가락으로 시사 */
+  @keyframes handSway{0%,100%{transform:translateX(-28px)}50%{transform:translateX(28px)}}
+  .hand-sway{animation:handSway 1.8s ease-in-out infinite}
+  ::-webkit-scrollbar{width:6px;height:6px}::-webkit-scrollbar-track{background:#0f172a}::-webkit-scrollbar-thumb{background:#334155;border-radius:3px}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition-duration:.01ms!important}}
+  :focus-visible{outline:2px solid #10b981;outline-offset:2px}
+</style>
+</head>
+<body class="bg-evoDark text-slate-100 min-h-screen flex flex-col">
+
+<header class="w-full max-w-md mx-auto p-4 flex justify-between items-center">
+  <div class="flex items-center space-x-2">
+    <div class="p-2 bg-emerald-500/20 text-emerald-400 rounded-lg border border-emerald-500/30"><i class="fa-solid fa-dna text-xl"></i></div>
+    <div>
+      <h1 class="text-lg font-bold leading-none">EVO SWIPE</h1>
+      <p class="text-[11px] text-slate-400 mt-0.5">형질 × 환경 페이오프</p>
+    </div>
+  </div>
+  <div class="flex gap-1.5">
+    <button id="openTree" class="px-3 py-1.5 glass rounded-full text-xs font-semibold text-emerald-400 hover:bg-slate-700/50"><i class="fa-solid fa-sitemap mr-1"></i>계통도</button>
+    <button id="openData" class="px-3 py-1.5 glass rounded-full text-xs font-semibold text-slate-300 hover:bg-slate-700/50"><i class="fa-solid fa-flask"></i></button>
+    <button id="openTut" class="px-3 py-1.5 glass rounded-full text-xs font-semibold text-slate-300 hover:bg-slate-700/50" aria-label="튜토리얼 다시 보기" title="튜토리얼 다시 보기"><i class="fa-solid fa-question"></i></button>
+  </div>
+</header>
+
+<main class="flex-1 flex flex-col items-center justify-center p-4 max-w-md mx-auto w-full">
+  <div class="text-center mb-3">
+    <span id="eraBadge" class="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30"></span>
+    <h2 id="speciesTitle" class="text-2xl font-extrabold mt-1.5"></h2>
+  </div>
+
+  <div class="w-full mb-3">
+    <div class="flex justify-between items-end text-[11px] mb-1">
+      <span class="text-slate-400">개체군</span>
+      <span id="popVal" class="font-bold font-mono text-sm"></span>
+    </div>
+    <div class="h-1.5 bg-slate-800 rounded-full overflow-hidden">
+      <div id="popBar" class="h-full rounded-full transition-all duration-500" style="width:100%"></div>
+    </div>
+  </div>
+
+  <div class="w-full h-[420px] relative flex justify-center items-center" style="perspective:1000px">
+    <!-- 배지는 카드 바깥에 둔다. 카드에 붙이면 카드가 밀려나갈 때 함께 화면을 벗어나
+         글자 앞부분이 잘린다. 선택지를 읽는 유일한 수단이므로 제자리에 고정한다. -->
+    <div id="badgeL" class="badge absolute top-5 left-5 bg-slate-100 text-slate-900 font-bold text-sm leading-snug px-3.5 py-2.5 rounded-xl -rotate-6 z-30 pointer-events-none max-w-[48%] shadow-2xl"></div>
+    <div id="badgeR" class="badge absolute top-5 right-5 bg-slate-100 text-slate-900 font-bold text-sm leading-snug px-3.5 py-2.5 rounded-xl rotate-6 z-30 pointer-events-none max-w-[48%] shadow-2xl"></div>
+
+    <div id="swipeCard" class="swipe-card absolute w-full h-full glass rounded-3xl p-6 flex flex-col justify-between shadow-2xl border-slate-700/50 overflow-hidden">
+      <div class="w-full flex justify-center py-3">
+        <div class="w-24 h-24 rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center border border-slate-700/60">
+          <div id="cardIcon" class="text-4xl text-emerald-400"></div>
+        </div>
+      </div>
+      <p id="scenarioText" class="my-auto text-center text-sm leading-relaxed text-slate-300 px-1"></p>
+      <div class="pt-3 border-t border-slate-800 text-[11px] text-slate-500">
+        <p class="text-center mb-1.5">닥쳐올 환경은 <span class="text-slate-300 font-semibold">선택한 뒤에</span> 공개됩니다</p>
+        <div id="envPreview" class="flex justify-center gap-1.5 flex-wrap"></div>
+      </div>
+    </div>
+  </div>
+
+  <p class="mt-5 text-[11px] text-slate-500 flex items-center gap-2">
+    <i class="fa-solid fa-arrow-left"></i>카드를 좌우로 밀어 형질을 고르십시오<i class="fa-solid fa-arrow-right"></i>
+  </p>
+</main>
+
+<footer class="w-full max-w-md mx-auto px-4 pb-4 text-center text-[11px] text-slate-500">
+  발견한 갈래 <span id="edgeCount" class="text-emerald-400 font-bold">0</span> / <span id="edgeTotal">0</span>
+  · 시드 <span id="seedLabel" class="text-slate-400 font-mono"></span>
+</footer>
+
+<!-- 환경 공개 → 판정 -->
+<div id="eventModal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md hidden items-center justify-center p-4 z-50">
+  <div class="w-full max-w-sm flex flex-col items-center">
+    <p class="text-xs text-slate-400 mb-1">선택한 형질</p>
+    <p id="evTrait" class="text-sm font-bold text-slate-100 mb-4 text-center"></p>
+
+    <div id="flipCard" class="flip w-56 h-56 mb-5">
+      <div class="flip-inner">
+        <div class="flip-face glass border border-slate-700">
+          <i class="fa-solid fa-dice-d20 text-4xl text-slate-500 dice-dot"></i>
+          <p class="text-xs text-slate-500 mt-3">환경 추첨 중</p>
+        </div>
+        <div id="flipBack" class="flip-face flip-back border p-4 text-center">
+          <i id="envIcon" class="fa-solid text-4xl mb-3"></i>
+          <p id="envName" class="font-extrabold text-lg"></p>
+          <p id="envDesc" class="text-xs mt-2 opacity-80 leading-relaxed"></p>
+        </div>
+      </div>
+    </div>
+
+    <div id="verdictBox" class="opacity-0 transition-opacity duration-500 w-full text-center">
+      <span id="verdictTag" class="inline-block text-xs font-bold px-3 py-1 rounded-full mb-2"></span>
+      <span id="popDelta" class="inline-block text-xs font-bold font-mono px-2 py-1 rounded-lg mb-2 ml-1"></span>
+      <p id="verdictNote" class="text-sm text-slate-300 leading-relaxed px-2 mb-5"></p>
+      <button id="contBtn" class="w-full py-3 bg-slate-100 text-slate-900 font-bold rounded-xl active:scale-95 transition">계속</button>
+    </div>
+  </div>
+</div>
+
+<!-- 엔딩 -->
+<div id="endModal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md hidden items-center justify-center p-4 z-50">
+  <div class="glass max-w-sm w-full rounded-3xl p-6 border-slate-700 text-center flex flex-col items-center">
+    <div id="endBadge" class="w-16 h-16 rounded-full flex items-center justify-center text-3xl mb-4 border"><i id="endIcon" class="fa-solid"></i></div>
+    <span id="endTag" class="text-xs font-bold px-3 py-1 rounded-full mb-2"></span>
+    <h3 id="endTitle" class="text-xl font-extrabold mb-2"></h3>
+    <p id="endDesc" class="text-sm text-slate-300 leading-relaxed mb-4"></p>
+    <div id="endPath" class="w-full text-left text-[11px] text-slate-400 bg-slate-900/60 rounded-xl p-3 mb-5 space-y-1"></div>
+    <button id="restartBtn" class="w-full py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-slate-950 font-bold rounded-xl active:scale-95 transition"><i class="fa-solid fa-rotate-left mr-2"></i>처음부터 (개체군 100)</button>
+    <div id="ckWrap" class="w-full mt-3 hidden">
+      <p class="text-[11px] text-slate-400 mb-2">도달했던 지점에서 이어가면 개체군 50으로 시작합니다</p>
+      <select id="ckSelect" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs mb-2"></select>
+      <button id="ckBtn" class="w-full py-2.5 bg-slate-700 hover:bg-slate-600 font-bold rounded-xl text-xs transition"><i class="fa-solid fa-forward mr-1.5"></i>여기서 이어하기</button>
+    </div>
+  </div>
+</div>
+
+<!-- 계통도 -->
+<div id="treeModal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md hidden items-center justify-center p-2 sm:p-4 z-50">
+  <div class="glass w-full max-w-5xl h-[94vh] rounded-3xl border-slate-700 flex flex-col overflow-hidden">
+
+    <div class="shrink-0 flex justify-between items-start gap-3 p-4 pb-3 border-b border-slate-700/60">
+      <div class="min-w-0">
+        <h3 class="font-bold text-base"><i class="fa-solid fa-sitemap text-emerald-400 mr-2"></i>계통도</h3>
+        <p class="text-[11px] text-slate-400 mt-0.5 whitespace-nowrap"><span class="hidden sm:inline">직접 지나온 갈래만 자랍니다 · </span>발견 <span id="treeCount" class="text-emerald-400 font-semibold">0 / 0</span></p>
+      </div>
+      <div class="flex items-center gap-1 shrink-0">
+        <button id="treeOut" class="w-8 h-8 rounded-lg bg-slate-800 border border-slate-700 text-slate-300 hover:text-slate-100 text-sm" aria-label="축소"><i class="fa-solid fa-minus"></i></button>
+        <button id="treeFit" class="px-2.5 h-8 rounded-lg bg-slate-800 border border-slate-700 text-slate-300 hover:text-slate-100 text-[11px] font-semibold">맞춤</button>
+        <button id="treeIn" class="w-8 h-8 rounded-lg bg-slate-800 border border-slate-700 text-slate-300 hover:text-slate-100 text-sm" aria-label="확대"><i class="fa-solid fa-plus"></i></button>
+        <button id="closeTree" class="w-8 h-8 ml-1 text-slate-400 hover:text-slate-100 text-lg" aria-label="닫기"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+    </div>
+
+    <div id="treeViewport" class="flex-1 relative overflow-hidden cursor-grab active:cursor-grabbing" style="touch-action:none">
+      <div id="treeStage" class="absolute top-0 left-0 origin-top-left">
+        <svg id="treeSvg" class="absolute top-0 left-0 pointer-events-none"></svg>
+        <div id="treeNodes" class="absolute top-0 left-0"></div>
+      </div>
+      <p id="treeHint" class="absolute inset-x-0 bottom-3 text-center text-[11px] text-slate-600 pointer-events-none">끌어서 이동 · 휠이나 두 손가락으로 확대</p>
+    </div>
+
+    <div class="shrink-0 px-4 py-2.5 border-t border-slate-700/60 flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-slate-400">
+      <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-slate-500"></span>계통 지점</span>
+      <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>생존</span>
+      <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-rose-400"></span>멸종</span>
+      <span class="flex items-center gap-1.5"><span class="w-5 h-0.5 bg-emerald-400 rounded"></span>이번 판 경로</span>
+      <span class="flex items-center gap-1.5"><i class="fa-solid fa-circle-dot text-emerald-400"></i>현재 위치</span>
+    </div>
+
+  </div>
+</div>
+
+<!-- 수업 데이터 -->
+<div id="dataModal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md hidden items-center justify-center p-3 z-50">
+  <div class="glass max-w-md w-full max-h-[88vh] rounded-3xl p-4 border-slate-700 flex flex-col">
+    <div class="flex justify-between items-center mb-3 pb-3 border-b border-slate-700/60">
+      <h3 class="font-bold text-base"><i class="fa-solid fa-flask text-emerald-400 mr-2"></i>수업 도구</h3>
+      <button id="closeData" class="text-slate-400 hover:text-slate-100 text-lg p-1"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="flex-1 overflow-y-auto space-y-4 text-sm">
+      <div>
+        <p class="font-semibold mb-1.5">시드 고정</p>
+        <p class="text-xs text-slate-400 mb-2">같은 시드면 같은 환경 순서가 나옵니다. 시연·판서용으로 쓰십시오.</p>
+        <div class="flex gap-2">
+          <input id="seedInput" type="text" inputmode="numeric" class="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm font-mono" placeholder="예: 1234">
+          <button id="applySeed" class="px-4 py-2 bg-emerald-500 text-slate-950 font-bold rounded-lg text-xs">적용</button>
+        </div>
+      </div>
+      <div>
+        <p class="font-semibold mb-1.5">플레이 기록 <span id="logCount" class="text-emerald-400"></span></p>
+        <p class="text-xs text-slate-400 mb-2">선택·환경·판정을 한 줄씩 남깁니다. 학급 결과를 모아 분포를 비교할 때 씁니다.</p>
+        <div class="flex gap-2">
+          <button id="copyLog" class="flex-1 py-2 bg-slate-700 rounded-lg text-xs font-semibold">JSON 복사</button>
+          <button id="dlLog" class="flex-1 py-2 bg-slate-700 rounded-lg text-xs font-semibold">CSV 내려받기</button>
+          <button id="clearLog" class="px-3 py-2 bg-rose-900/50 text-rose-300 rounded-lg text-xs font-semibold">비우기</button>
+        </div>
+        <p id="copyMsg" class="text-xs text-emerald-400 mt-2 h-4"></p>
+      </div>
+      <div class="text-xs text-slate-400 leading-relaxed border-t border-slate-800 pt-3">
+        <p class="font-semibold text-slate-300 mb-1">읽는 법</p>
+        <p>같은 형질이라도 환경이 달라지면 판정이 뒤집힙니다. 어떤 형질이 "더 좋은" 것이 아니라, 형질과 환경의 <span class="text-slate-200">조합</span>이 결과를 만듭니다.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 튜토리얼 -->
+<div id="tutModal" class="fixed inset-0 bg-slate-950/95 backdrop-blur-md hidden items-center justify-center p-4 z-[60]">
+  <div class="w-full max-w-md h-full max-h-[94vh] flex flex-col">
+
+    <div class="shrink-0 flex justify-end h-9 items-center">
+      <button id="tutSkip" class="px-3 py-1.5 text-xs font-semibold text-slate-500 hover:text-slate-100 transition">건너뛰기<i class="fa-solid fa-angles-right ml-1.5"></i></button>
+    </div>
+
+    <div class="flex-1 min-h-0 overflow-y-auto flex flex-col items-center justify-center text-center px-1">
+
+      <!-- 0 · 타이틀 -->
+      <section data-step="0" class="tut-step w-full flex flex-col items-center">
+        <div class="w-20 h-20 rounded-3xl bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 flex items-center justify-center mb-5">
+          <i class="fa-solid fa-dna text-4xl"></i>
+        </div>
+        <h2 class="text-3xl font-extrabold tracking-tight">EVO SWIPE</h2>
+        <p class="text-sm text-emerald-400 font-semibold mt-1.5">형질 × 환경 페이오프</p>
+        <p class="text-sm text-slate-400 leading-relaxed mt-5 max-w-xs">
+          5억 년 전 바다에서 출발해, 세대마다 형질 하나를 고릅니다.
+          어떤 환경이 닥칠지는 고른 뒤에야 알 수 있습니다.
+        </p>
+      </section>
+
+      <!-- 1 · 조작 -->
+      <section data-step="1" class="tut-step hidden w-full flex flex-col items-center">
+        <div class="w-16 h-16 rounded-2xl bg-slate-800 border border-slate-700 flex items-center justify-center mb-5 text-slate-300">
+          <i class="fa-solid fa-arrows-left-right text-2xl"></i>
+        </div>
+        <h3 class="text-xl font-extrabold">카드를 밀어서 고릅니다</h3>
+        <p class="text-sm text-slate-400 leading-relaxed mt-4 max-w-xs">
+          세대마다 두 갈래 형질이 주어집니다.
+          카드를 <span class="text-slate-200 font-semibold">왼쪽이나 오른쪽으로 밀면</span> 그쪽 형질을 선택합니다.
+        </p>
+        <div class="mt-6 w-full max-w-xs bg-slate-900/60 border border-slate-800 rounded-2xl p-4">
+          <div class="flex items-center justify-between text-[11px]">
+            <span class="flex items-center gap-1.5 text-slate-300"><i class="fa-solid fa-arrow-left"></i>왼쪽 형질</span>
+            <span class="text-slate-600">밀면 이름이 뜹니다</span>
+            <span class="flex items-center gap-1.5 text-slate-300">오른쪽 형질<i class="fa-solid fa-arrow-right"></i></span>
+          </div>
+        </div>
+        <p class="text-[11px] text-slate-500 mt-4">키보드 ← → 로도 고를 수 있습니다.</p>
+      </section>
+
+      <!-- 2 · 순서 -->
+      <section data-step="2" class="tut-step hidden w-full flex flex-col items-center">
+        <div class="w-16 h-16 rounded-2xl bg-slate-800 border border-slate-700 flex items-center justify-center mb-5 text-slate-300">
+          <i class="fa-solid fa-dice-d20 text-2xl"></i>
+        </div>
+        <h3 class="text-xl font-extrabold">환경은 고른 뒤에 공개됩니다</h3>
+        <p class="text-sm text-slate-400 leading-relaxed mt-4 max-w-xs">
+          무엇이 닥칠지 모르는 채로 선택합니다.
+          선택이 끝나야 환경이 추첨되고 판정이 나옵니다.
+        </p>
+        <div class="mt-6 w-full max-w-xs space-y-2 text-left">
+          <div class="flex items-center gap-3 bg-emerald-500/10 border border-emerald-500/30 rounded-xl px-3 py-2">
+            <span class="text-xs font-bold text-emerald-400 w-10 shrink-0">번성</span>
+            <span class="text-[11px] text-slate-400 flex-1">개체군이 늘고 계통이 이어집니다</span>
+            <span class="text-xs font-mono font-bold text-emerald-400">+25</span>
+          </div>
+          <div class="flex items-center gap-3 bg-amber-500/10 border border-amber-500/30 rounded-xl px-3 py-2">
+            <span class="text-xs font-bold text-amber-400 w-10 shrink-0">생존</span>
+            <span class="text-[11px] text-slate-400 flex-1">버티기는 하지만 수가 줄어듭니다</span>
+            <span class="text-xs font-mono font-bold text-amber-400">−20</span>
+          </div>
+          <div class="flex items-center gap-3 bg-rose-500/10 border border-rose-500/30 rounded-xl px-3 py-2">
+            <span class="text-xs font-bold text-rose-400 w-10 shrink-0">멸종</span>
+            <span class="text-[11px] text-slate-400 flex-1">그 자리에서 끝납니다</span>
+            <span class="text-xs font-mono font-bold text-rose-400">종료</span>
+          </div>
+        </div>
+        <p class="text-[11px] text-slate-500 mt-4 max-w-xs leading-relaxed">개체군이 0까지 줄어도 끝납니다. 한 번에 죽지 않고 조금씩 줄어드는 것도 멸종입니다.</p>
+      </section>
+
+      <!-- 3 · 핵심 -->
+      <section data-step="3" class="tut-step hidden w-full flex flex-col items-center">
+        <div class="w-16 h-16 rounded-2xl bg-slate-800 border border-slate-700 flex items-center justify-center mb-5 text-emerald-400">
+          <i class="fa-solid fa-table-cells text-2xl"></i>
+        </div>
+        <h3 class="text-xl font-extrabold">더 좋은 형질은 없습니다</h3>
+        <p class="text-sm text-slate-400 leading-relaxed mt-4 max-w-xs">
+          같은 형질이라도 환경이 달라지면 판정이 뒤집힙니다.
+          결과를 만드는 것은 형질과 환경의 <span class="text-slate-200 font-semibold">조합</span>입니다.
+        </p>
+        <div class="mt-6 w-full max-w-xs bg-slate-900/60 border border-slate-800 rounded-2xl p-4 text-left">
+          <p class="text-[11px] text-slate-500 mb-2.5">예 · 무거운 갑옷</p>
+          <div class="grid grid-cols-2 gap-2">
+            <div class="rounded-lg px-2 py-2 text-center" style="background:#10b98126;border:1px solid #10b9814d">
+              <p class="text-[10px] text-slate-400 mb-1">포식자 급증</p>
+              <p class="text-xs font-bold text-emerald-400">번성</p>
+            </div>
+            <div class="rounded-lg px-2 py-2 text-center" style="background:#ef444426;border:1px solid #ef44444d">
+              <p class="text-[10px] text-slate-400 mb-1">해양 무산소</p>
+              <p class="text-xs font-bold text-rose-400">멸종</p>
+            </div>
+          </div>
+        </div>
+        <p class="text-[11px] text-slate-500 mt-4">지나온 갈래는 상단 「계통도」에 계통수로 쌓입니다.</p>
+      </section>
+
+      <!-- 4 · 실습 -->
+      <section data-step="4" class="tut-step hidden w-full flex flex-col items-center">
+        <h3 class="text-xl font-extrabold">직접 한 번 밀어보십시오</h3>
+        <p class="text-sm text-slate-400 mt-2">좌우 어느 쪽이든 괜찮습니다. 연습이라 기록에 남지 않습니다.</p>
+        <div class="w-full h-[240px] relative flex justify-center items-center mt-5" style="perspective:1000px">
+          <div id="tutBadgeL" class="badge absolute top-4 left-4 bg-slate-100 text-slate-900 font-bold text-sm leading-snug px-3.5 py-2.5 rounded-xl -rotate-6 z-30 pointer-events-none max-w-[48%] shadow-2xl">두꺼운 껍데기</div>
+          <div id="tutBadgeR" class="badge absolute top-4 right-4 bg-slate-100 text-slate-900 font-bold text-sm leading-snug px-3.5 py-2.5 rounded-xl rotate-6 z-30 pointer-events-none max-w-[48%] shadow-2xl">빠른 헤엄</div>
+          <div id="tutCard" class="swipe-card absolute w-full h-full glass rounded-3xl p-6 flex flex-col justify-center items-center shadow-2xl border-slate-700/50 overflow-hidden">
+            <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center border border-slate-700/60 mb-4">
+              <i class="fa-solid fa-worm text-3xl text-emerald-400"></i>
+            </div>
+            <p class="text-sm text-slate-300 font-semibold">연습용 카드</p>
+            <div id="tutHand" class="mt-5 text-slate-500 text-2xl hand-sway"><i class="fa-solid fa-hand-pointer"></i></div>
+          </div>
+        </div>
+        <p id="tutDone" class="mt-5 text-sm font-bold text-emerald-400 opacity-0 transition-opacity duration-300"><i class="fa-solid fa-check mr-1.5"></i>좋습니다. 이제 시작할 수 있습니다.</p>
+      </section>
+
+    </div>
+
+    <div class="shrink-0 pt-5 flex items-center gap-3">
+      <button id="tutPrev" class="w-11 h-11 shrink-0 rounded-xl bg-slate-800 border border-slate-700 text-slate-400 hover:text-slate-100 transition disabled:opacity-30" aria-label="이전"><i class="fa-solid fa-arrow-left"></i></button>
+      <div id="tutDots" class="flex-1 flex justify-center gap-1.5"></div>
+      <button id="tutNext" class="px-6 h-11 shrink-0 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 text-slate-950 font-bold text-sm transition active:scale-95 disabled:opacity-30 disabled:active:scale-100"></button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+/* ── 환경 카드 ───────────────────────────────────────── */
+const ENV = {
+  predator_boom:{n:'포식자 급증',i:'fa-shrimp',d:'대형 절지동물 포식자가 급격히 늘어난다',c:'rose'},
+  anoxia:{n:'해양 무산소',i:'fa-lungs',d:'바닷물에 녹은 산소가 급감한다',c:'violet'},
+  sea_level_drop:{n:'해수면 하강',i:'fa-arrow-down-long',d:'얕은 바다가 갈라지고 물길이 끊긴다',c:'amber'},
+  reef_expansion:{n:'산호초 확장',i:'fa-fan',d:'따뜻한 얕은 바다에 먹이가 넘친다',c:'emerald'},
+  ocean_cooling:{n:'해수 냉각',i:'fa-temperature-low',d:'수온이 내려가 먹이가 줄어든다',c:'sky'},
+  coastal_shallow:{n:'연안 습지 확대',i:'fa-water',d:'얕고 따뜻한 물가가 넓어진다',c:'teal'},
+  deep_stable:{n:'심해 안정',i:'fa-circle-dot',d:'깊은 바다는 거의 변하지 않는다',c:'indigo'},
+  swamp_drying:{n:'습지 건조',i:'fa-droplet-slash',d:'물웅덩이가 하나둘 말라붙는다',c:'amber'},
+  humid_forest:{n:'다우 삼림',i:'fa-tree',d:'비가 잦고 숲이 두껍게 우거진다',c:'emerald'},
+  arid_pulse:{n:'내륙 건조화',i:'fa-sun',d:'내륙이 마르고 사막이 넓어진다',c:'orange'},
+  glaciation:{n:'빙하 확대',i:'fa-snowflake',d:'기온이 내려가고 얼음이 남하한다',c:'sky'},
+  volcanic_winter:{n:'화산 겨울',i:'fa-fire',d:'화산재가 햇빛을 가려 오래 춥다',c:'violet'},
+  dino_dominance:{n:'공룡 번성',i:'fa-dragon',d:'낮 시간대를 대형 공룡이 장악한다',c:'rose'},
+  grassland_spread:{n:'초원 확산',i:'fa-wheat-awn',d:'탁 트인 풀밭이 대륙을 덮는다',c:'lime'},
+  impact_winter:{n:'충돌 겨울',i:'fa-meteor',d:'운석 충돌 뒤 몇 해 동안 해가 흐리다',c:'rose'}
+};
+
+/* ── 엔딩 ────────────────────────────────────────────── */
+const END = {
+  ext_suffocation:{t:'멸종',n:'질식',i:'fa-lungs',d:'산소를 충분히 얻지 못해 개체군이 통째로 무너졌습니다.'},
+  ext_starvation:{t:'멸종',n:'기아',i:'fa-bone',d:'몸을 유지할 먹이를 구하지 못해 굶어 사라졌습니다.'},
+  ext_desiccation:{t:'멸종',n:'건조',i:'fa-droplet-slash',d:'피부와 알이 마르면서 다음 세대를 남기지 못했습니다.'},
+  ext_frozen:{t:'멸종',n:'한랭',i:'fa-snowflake',d:'낮은 기온에서 체온과 대사를 유지하지 못했습니다.'},
+  ext_outcompeted:{t:'멸종',n:'경쟁 도태',i:'fa-users-slash',d:'같은 자원을 노리는 다른 무리에게 밀려 자리를 잃었습니다.'},
+  ext_collapse:{t:'멸종',n:'개체군 붕괴',i:'fa-chart-line-down',d:'한 번에 죽지는 않았습니다. 다만 세대마다 조금씩 줄어든 수가 끝내 회복 지점을 넘지 못했습니다. 대부분의 멸종은 이렇게 일어납니다.'},
+
+  end_dunkleosteus:{t:'생존',n:'던클레오스테우스',i:'fa-shield-halved',d:'데본기 바다의 최상위 포식자가 되었습니다. 다만 이 갑옷 계통은 데본기 말 환경 변화와 함께 통째로 사라집니다.'},
+  end_shark:{t:'생존',n:'상어류',i:'fa-fish-fins',d:'가벼운 연골 골격과 예민한 감각으로 4억 년을 버텼습니다.'},
+  end_coelacanth:{t:'생존',n:'실러캔스',i:'fa-circle-dot',d:'변하지 않는 심해에 남아 모습을 거의 바꾸지 않은 채 오늘까지 이어졌습니다.'},
+  end_amphibian_today:{t:'생존',n:'현생 양서류',i:'fa-paw',d:'축축한 피부를 그대로 지닌 채 물가에 남았습니다. 개구리와 도롱뇽이 그 후손입니다.'},
+  end_human:{t:'생존',n:'사람',i:'fa-user-astronaut',d:'큰 뇌와 도구, 촘촘한 사회로 거의 모든 환경에 들어갔습니다.'},
+  end_primate:{t:'생존',n:'숲 영장류',i:'fa-hand',d:'숲 위쪽을 차지하고 손과 눈을 정교하게 다듬었습니다.'},
+  end_megafauna:{t:'생존',n:'대형 초식동물',i:'fa-hippo',d:'넓은 초원을 걸으며 거대한 몸을 지탱하는 소화계를 갖췄습니다.'},
+  end_whale:{t:'생존',n:'고래류',i:'fa-otter',d:'다시 바다로 들어가 지구 역사상 가장 큰 몸을 이뤘습니다.'},
+  end_reptile:{t:'생존',n:'현생 파충류',i:'fa-staff-snake',d:'낮은 대사와 은신으로 여러 차례의 대멸종을 모두 통과했습니다.'},
+  end_dino_reign:{t:'생존',n:'중생대 공룡',i:'fa-dragon',d:'1억 년 넘게 육상을 지배했습니다. 다만 이 몸집은 충돌 겨울을 견디지 못합니다.'},
+  end_bird:{t:'생존',n:'조류',i:'fa-crow',d:'가벼운 뼈와 깃털로 하늘을 차지했고, 공룡 중 유일하게 오늘까지 이어졌습니다.'}
+};
+
+/* ── 분기 노드 + 형질×환경 페이오프 ─────────────────── */
+const TREE = {
+pikaia:{title:'원시 척삭동물 (피카이아)',era:'캄브리아기 · 약 5억 년 전',icon:'fa-worm',
+  scenario:'몸을 어느 쪽으로 바꿀지 정합니다. 무엇이 유리할지는 앞으로 어떤 바다가 오느냐에 달렸습니다.',
+  L:{trait:'armor',label:'단단한 외골격을 두른다'},
+  R:{trait:'agility',label:'척삭과 지느러미를 발달시킨다'},
+  envs:['predator_boom','anoxia','sea_level_drop'],
+  pay:{
+    armor:{predator_boom:{v:'thrive',to:'placoderm',note:'갑옷이 포식자의 집게를 막아냈습니다.'},
+           anoxia:{v:'survive',to:'placoderm',dp:-45,note:'무거운 갑옷은 산소가 부족한 물에서 치명적인 짐이었습니다. 대부분이 죽고 소수만 남았습니다.'},
+           sea_level_drop:{v:'survive',to:'placoderm',note:'좁아진 바닥에서 몸을 웅크린 채 겨우 버팁니다.'}},
+    agility:{predator_boom:{v:'survive',to:'jawed_fish',note:'빠르게 달아났지만 개체수는 크게 줄었습니다.'},
+           anoxia:{v:'thrive',to:'jawed_fish',note:'가벼운 몸은 적은 산소로도 유지됩니다.'},
+           sea_level_drop:{v:'survive',to:'jawed_fish',dp:-45,note:'헤엄칠 물길이 끊겨 웅덩이마다 갇혔습니다. 살아남은 무리는 극소수입니다.'}}
+  }},
+
+placoderm:{title:'갑주어',era:'실루리아기~데본기 · 약 4억 년 전',icon:'fa-shield-halved',
+  scenario:'갑옷을 어디까지 밀어붙일지 정합니다. 더 두껍게 갈지, 무게를 덜고 턱에 투자할지.',
+  L:{trait:'heavy_plate',label:'판갑을 더 두껍고 크게 키운다'},
+  R:{trait:'jaw_power',label:'갑옷을 줄이고 턱 힘에 투자한다'},
+  envs:['reef_expansion','anoxia','ocean_cooling'],
+  pay:{
+    heavy_plate:{reef_expansion:{v:'thrive',to:'end_dunkleosteus',note:'먹이가 넘치는 바다에서 거대한 몸을 끝까지 키웠습니다.'},
+           anoxia:{v:'perish',to:'ext_suffocation',note:'큰 몸이 요구하는 산소를 물이 대주지 못했습니다.'},
+           ocean_cooling:{v:'perish',to:'ext_starvation',note:'두꺼운 판갑을 유지할 먹이가 끊겼습니다.'}},
+    jaw_power:{reef_expansion:{v:'survive',to:'jawed_fish',note:'경쟁이 치열했지만 턱으로 몫을 챙겼습니다.'},
+           anoxia:{v:'survive',to:'jawed_fish',note:'가벼워진 만큼 숨 쉴 여유가 남았습니다.'},
+           ocean_cooling:{v:'thrive',to:'jawed_fish',note:'먹이가 줄어든 바다에서는 가벼운 몸이 훨씬 유리했습니다.'}}
+  }},
+
+jawed_fish:{title:'원시 유턱어류',era:'실루리아기 말 · 약 4억 2천만 년 전',icon:'fa-fish',
+  scenario:'골격을 어떤 재료로 지을지 정합니다.',
+  L:{trait:'cartilage',label:'가벼운 연골 골격으로 간다'},
+  R:{trait:'bone_lung',label:'단단한 경골과 원시 폐를 갖춘다'},
+  envs:['ocean_cooling','coastal_shallow','anoxia'],
+  pay:{
+    cartilage:{ocean_cooling:{v:'thrive',to:'end_shark',note:'가벼운 몸으로 넓은 바다를 돌며 먹이를 찾았습니다.'},
+           coastal_shallow:{v:'survive',to:'end_shark',note:'얕은 물의 기회는 놓쳤지만 깊은 바다를 지켰습니다.'},
+           anoxia:{v:'perish',to:'ext_suffocation',note:'아가미만으로는 산소가 빠진 물을 견딜 수 없었습니다.'}},
+    bone_lung:{ocean_cooling:{v:'survive',to:'tiktaalik',note:'무거운 뼈가 부담이었지만 버텨냈습니다.'},
+           coastal_shallow:{v:'thrive',to:'tiktaalik',note:'얕고 따뜻한 물가에서 지느러미로 바닥을 짚고 다녔습니다.'},
+           anoxia:{v:'thrive',to:'tiktaalik',note:'수면 위 공기를 삼킬 수 있어 오히려 유리했습니다.'}}
+  }},
+
+tiktaalik:{title:'육기어류 (틱타알릭)',era:'데본기 · 약 3억 7500만 년 전',icon:'fa-frog',
+  scenario:'물가에 남을지, 물 밖으로 나갈지 정합니다.',
+  L:{trait:'deep_water',label:'깊은 물로 물러나 수중 생활을 지킨다'},
+  R:{trait:'limb_bone',label:'지느러미 뼈를 다리로 개조한다'},
+  envs:['coastal_shallow','swamp_drying','deep_stable'],
+  pay:{
+    deep_water:{coastal_shallow:{v:'survive',to:'end_coelacanth',note:'얕은 물의 기회는 지나쳤지만 안전했습니다.'},
+           swamp_drying:{v:'survive',to:'end_coelacanth',note:'물가가 말라도 깊은 바다는 영향이 적었습니다.'},
+           deep_stable:{v:'thrive',to:'end_coelacanth',note:'거의 변하지 않는 환경에서 몸을 바꿀 이유가 없었습니다.'}},
+    limb_bone:{coastal_shallow:{v:'thrive',to:'amphibian',note:'얕은 물 바닥을 걸어 다니며 새 먹이를 독차지했습니다.'},
+           swamp_drying:{v:'survive',to:'amphibian',note:'마르는 웅덩이 사이를 기어서 옮겨 다녔습니다.'},
+           deep_stable:{v:'perish',to:'ext_outcompeted',note:'깊은 물에서 다리 같은 지느러미는 쓸모가 없어 밀려났습니다.'}}
+  }},
+
+amphibian:{title:'고대 양서류',era:'석탄기 · 약 3억 4천만 년 전',icon:'fa-paw',
+  scenario:'육지에 올라섰지만 피부가 금세 마릅니다. 번식과 수분을 어떻게 해결할지 정합니다.',
+  L:{trait:'skin_breath',label:'축축한 피부 호흡을 그대로 지킨다'},
+  R:{trait:'amniotic_egg',label:'껍질 있는 알(양막란)을 만든다'},
+  envs:['humid_forest','arid_pulse','glaciation'],
+  pay:{
+    skin_breath:{humid_forest:{v:'thrive',to:'end_amphibian_today',note:'축축한 숲 바닥 전체가 서식지가 되었습니다.'},
+           arid_pulse:{v:'perish',to:'ext_desiccation',note:'피부와 알이 함께 말라 다음 세대가 끊겼습니다.'},
+           glaciation:{v:'survive',to:'end_amphibian_today',note:'활동 범위가 크게 줄었지만 물가에서 버텼습니다.'}},
+    amniotic_egg:{humid_forest:{v:'survive',to:'amniote',note:'굳이 알을 감쌀 이유가 적어 이점이 작았습니다.'},
+           arid_pulse:{v:'thrive',to:'amniote',note:'알이 마르지 않으니 물가에서 완전히 벗어났습니다.'},
+           glaciation:{v:'survive',to:'amniote',note:'껍질이 알을 보호해 추운 계절도 넘겼습니다.'}}
+  }},
+
+amniote:{title:'원시 양막류',era:'페름기 · 약 3억 년 전',icon:'fa-egg',
+  scenario:'체온과 대사 방식을 정합니다.',
+  L:{trait:'fur_metabolism',label:'대사를 올리고 털로 체온을 지킨다'},
+  R:{trait:'scale_efficiency',label:'비늘과 낮은 대사로 에너지를 아낀다'},
+  envs:['volcanic_winter','arid_pulse','humid_forest'],
+  pay:{
+    fur_metabolism:{volcanic_winter:{v:'thrive',to:'synapsid',note:'스스로 열을 내어 추운 낮에도 움직였습니다.'},
+           arid_pulse:{v:'survive',to:'synapsid',note:'높은 대사는 물과 먹이를 많이 요구했습니다.'},
+           humid_forest:{v:'survive',to:'synapsid',note:'먹이는 넉넉했지만 특별한 이점은 없었습니다.'}},
+    scale_efficiency:{volcanic_winter:{v:'perish',to:'ext_frozen',note:'바깥 열에 기대던 몸이 흐린 하늘 아래 굳어버렸습니다.'},
+           arid_pulse:{v:'thrive',to:'diapsid',note:'물과 먹이가 적어도 오래 버티는 몸이 결정적이었습니다.'},
+           humid_forest:{v:'thrive',to:'diapsid',note:'적은 먹이로 큰 몸을 굴려 숲을 채웠습니다.'}}
+  }},
+
+synapsid:{title:'단궁류 (포유류 조상)',era:'트라이아스기 · 약 2억 3천만 년 전',icon:'fa-cat',
+  scenario:'거대한 경쟁자들이 지상에 등장했습니다. 몸집 전략을 정합니다.',
+  L:{trait:'big_body',label:'몸집을 키워 정면으로 경쟁한다'},
+  R:{trait:'small_nocturnal',label:'작아지고 밤에 활동하며 젖을 먹인다'},
+  envs:['dino_dominance','arid_pulse','humid_forest'],
+  pay:{
+    big_body:{dino_dominance:{v:'perish',to:'ext_outcompeted',note:'같은 크기, 같은 먹이를 두고 붙어 완패했습니다.'},
+           arid_pulse:{v:'survive',to:'mammal',note:'먹이가 흩어진 땅에서 큰 몸을 겨우 유지했습니다.'},
+           humid_forest:{v:'thrive',to:'mammal',note:'먹이가 넉넉해 큰 몸이 곧 힘이 되었습니다.'}},
+    small_nocturnal:{dino_dominance:{v:'thrive',to:'mammal',note:'경쟁자가 잠든 밤 시간대를 통째로 차지했습니다.'},
+           arid_pulse:{v:'survive',to:'mammal',note:'작은 몸은 적게 먹어도 되어 버틸 만했습니다.'},
+           humid_forest:{v:'survive',to:'mammal',note:'큰 무리에 가려 구석에서 살아갔습니다.'}}
+  }},
+
+mammal:{title:'원시 포유류',era:'신생대 초 · 약 6600만 년 전',icon:'fa-hippo',
+  scenario:'대멸종으로 비어버린 생태계가 눈앞에 있습니다. 어디에 투자할지 정합니다.',
+  L:{trait:'brain',label:'뇌를 키우고 도구를 쓴다'},
+  R:{trait:'big_body',label:'몸집을 키우거나 바다로 돌아간다'},
+  envs:['grassland_spread','glaciation','humid_forest'],
+  pay:{
+    brain:{grassland_spread:{v:'thrive',to:'end_human',note:'탁 트인 땅에서 두 발로 서서 멀리 보고 협력했습니다.'},
+           glaciation:{v:'survive',to:'end_human',note:'불과 도구로 빙하기를 넘겼습니다.'},
+           humid_forest:{v:'survive',to:'end_primate',note:'숲 위쪽에 머무르며 손과 눈을 다듬었습니다.'}},
+    big_body:{grassland_spread:{v:'thrive',to:'end_megafauna',note:'끝없는 풀밭이 거대한 몸을 먹여 살렸습니다.'},
+           glaciation:{v:'survive',to:'end_whale',note:'바다로 들어가 두꺼운 지방층으로 추위를 견뎠습니다.'},
+           humid_forest:{v:'perish',to:'ext_starvation',note:'빽빽한 숲에서 큰 몸이 먹을 만큼을 모으지 못했습니다.'}}
+  }},
+
+diapsid:{title:'석형류 (파충류·공룡 조상)',era:'트라이아스기 말 · 약 2억 년 전',icon:'fa-staff-snake',
+  scenario:'다리를 몸에 어떻게 붙일지 정합니다.',
+  L:{trait:'sprawl',label:'다리를 옆으로 뻗어 기어 다닌다'},
+  R:{trait:'erect',label:'다리를 몸 바로 아래로 세운다'},
+  envs:['arid_pulse','volcanic_winter','humid_forest'],
+  pay:{
+    sprawl:{arid_pulse:{v:'thrive',to:'end_reptile',note:'거의 움직이지 않고도 오래 버티는 몸이 사막을 채웠습니다.'},
+           volcanic_winter:{v:'survive',to:'end_reptile',note:'대사를 끝까지 낮춰 굶으며 겨울을 넘겼습니다.'},
+           humid_forest:{v:'survive',to:'end_reptile',note:'느리지만 숨을 곳이 많아 무사했습니다.'}},
+    erect:{arid_pulse:{v:'survive',to:'dinosaur',note:'멀리 걸어 물을 찾아다녔습니다.'},
+           volcanic_winter:{v:'perish',to:'ext_frozen',note:'빠르게 움직이는 몸을 채울 먹이가 사라졌습니다.'},
+           humid_forest:{v:'thrive',to:'dinosaur',note:'곧은 다리로 오래 걸으며 숲 전체를 무대로 삼았습니다.'}}
+  }},
+
+dinosaur:{title:'공룡',era:'백악기 말 · 약 6600만 년 전',icon:'fa-dragon',
+  scenario:'몸을 어느 방향으로 더 밀어붙일지 정합니다.',
+  L:{trait:'armor_horn',label:'뿔과 갑옷으로 더 크게 무장한다'},
+  R:{trait:'feather_flight',label:'뼈를 비우고 깃털을 달아 날아오른다'},
+  envs:['impact_winter','humid_forest','volcanic_winter'],
+  pay:{
+    armor_horn:{impact_winter:{v:'perish',to:'ext_starvation',note:'해가 흐려 식물이 죽자 거대한 몸이 먼저 굶었습니다.'},
+           humid_forest:{v:'thrive',to:'end_dino_reign',note:'풍부한 식생이 거대한 무리를 떠받쳤습니다.'},
+           volcanic_winter:{v:'survive',to:'end_dino_reign',note:'수가 크게 줄었지만 계통은 이어졌습니다.'}},
+    feather_flight:{impact_winter:{v:'thrive',to:'end_bird',note:'작고 가벼운 몸과 씨앗을 먹는 부리가 긴 겨울을 통과시켰습니다.'},
+           humid_forest:{v:'survive',to:'end_bird',note:'나무 위 자리를 얻었지만 지상은 여전히 남의 것이었습니다.'},
+           volcanic_winter:{v:'survive',to:'end_bird',note:'날아서 먹이를 찾아다니며 버텼습니다.'}}
+  }}
+};
+
+/* ── 난수 (시드 고정 가능) ───────────────────────────── */
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+const params=new URLSearchParams(location.search);
+let seed=parseInt(params.get('seed'))||Math.floor(Math.random()*100000);
+let rng=mulberry32(seed);
+
+/* ── 상태 ────────────────────────────────────────────── */
+let node='pikaia', pending=null, path=[], log=[], locked=false;
+let pop=100; const MAXPOP=120, POPD={thrive:25,survive:-20,perish:-999};
+const reached=new Set(['pikaia']);
+const seen=new Set();
+const runEdges=new Set();   // 이번 판에 지나온 가지. 계통도에서 굵게 그린다
+
+/* 계통도의 가지 = 「노드 --형질--> 도착지」.
+   여러 환경이 같은 곳으로 이어지면 한 가지로 합쳐진다. */
+const ALL_EDGES=(()=>{
+  const s=new Set();
+  Object.entries(TREE).forEach(([id,n])=>Object.entries(n.pay).forEach(([t,byEnv])=>
+    Object.values(byEnv).forEach(c=>s.add(`${id}|${t}|${c.to}`))));
+  return s;
+})();
+function foundEdges(){
+  const s=new Set();
+  seen.forEach(k=>{
+    const [n,t,e]=k.split('|');
+    const c=TREE[n]&&TREE[n].pay[t]&&TREE[n].pay[t][e];
+    if(c) s.add(`${n}|${t}|${c.to}`);
+  });
+  return s;
+}
+
+/* ── DOM ─────────────────────────────────────────────── */
+const $=id=>document.getElementById(id);
+$('edgeTotal').textContent=ALL_EDGES.size;
+$('seedLabel').textContent=seed;
+const updateEdgeCount=()=>{ $('edgeCount').textContent=foundEdges().size; };
+
+const VERDICT={thrive:{n:'번성',c:'emerald'},survive:{n:'생존',c:'amber'},perish:{n:'멸종',c:'rose'}};
+const HEX={emerald:'#10b981',amber:'#f59e0b',rose:'#ef4444',violet:'#8b5cf6',sky:'#0ea5e9',teal:'#14b8a6',indigo:'#6366f1',orange:'#f97316',lime:'#84cc16'};
+
+function render(id){
+  node=id; reached.add(id); const n=TREE[id];
+  $('eraBadge').textContent=n.era;
+  $('speciesTitle').textContent=n.title;
+  $('scenarioText').textContent=n.scenario;
+  $('cardIcon').innerHTML=`<i class="fa-solid ${n.icon}"></i>`;
+  $('badgeL').textContent=n.L.label;
+  $('badgeR').textContent=n.R.label;
+  $('envPreview').innerHTML=n.envs.map(e=>
+    `<span class="px-2 py-0.5 rounded-full bg-slate-800 border border-slate-700 text-slate-400">${ENV[e].n}</span>`).join('');
+  resetCard(); locked=false; renderPop(); updateEdgeCount();
+}
+function renderPop(){
+  const c = pop>60?HEX.emerald : pop>30?HEX.amber : HEX.rose;
+  $('popVal').textContent=Math.max(0,Math.round(pop));
+  $('popVal').style.color=c;
+  $('popBar').style.width=Math.max(0,Math.min(pop/MAXPOP,1))*100+'%';
+  $('popBar').style.background=c;
+}
+function resetCard(){
+  const c=$('swipeCard'); c.classList.remove('anim');
+  c.style.transform='translateX(0) rotate(0)'; c.style.opacity='1';
+  $('badgeL').style.opacity='0'; $('badgeR').style.opacity='0';
+}
+
+/* ── 선택 → 환경 추첨 → 판정 ────────────────────────── */
+function choose(side){
+  const n=TREE[node], ch=n[side==='L'?'L':'R'];
+  const env=n.envs[Math.floor(rng()*n.envs.length)];
+  const cell=n.pay[ch.trait] && n.pay[ch.trait][env];
+  if(!cell){ console.error('페이오프 누락',node,ch.trait,env); render(node); return; }
+  pending={node,trait:ch.trait,label:ch.label,env,cell};
+  seen.add(`${node}|${ch.trait}|${env}`);
+  runEdges.add(`${node}|${ch.trait}|${cell.to}`);
+  log.push({node:n.title,trait:ch.label,env:ENV[env].n,verdict:VERDICT[cell.v].n,seed});
+  showEvent();
+}
+
+function showEvent(){
+  const {label,env,cell}=pending, e=ENV[env], col=HEX[e.c]||'#10b981';
+  $('evTrait').textContent=label;
+  $('envIcon').className=`fa-solid ${e.i} text-4xl mb-3`;
+  $('envIcon').style.color=col;
+  $('envName').textContent=e.n; $('envName').style.color=col;
+  $('envDesc').textContent=e.d;
+  $('flipBack').style.borderColor=col+'66';
+  $('flipBack').style.background=col+'1a';
+
+  const vb=$('verdictBox'); vb.style.opacity='0';
+  const V=VERDICT[cell.v], vc=HEX[V.c];
+  $('verdictTag').textContent=V.n;
+  $('verdictTag').style.cssText=`background:${vc}26;color:${vc};border:1px solid ${vc}4d`;
+  $('verdictNote').textContent=cell.note;
+  const dp = cell.dp!==undefined?cell.dp:POPD[cell.v];
+  const el=$('popDelta');
+  if(cell.v==='perish'){ el.textContent='개체군 소멸'; el.style.cssText=`background:${HEX.rose}26;color:${HEX.rose}`; }
+  else { el.textContent=(dp>0?'+':'')+dp; el.style.cssText=`background:${dp>0?HEX.emerald:HEX.rose}26;color:${dp>0?HEX.emerald:HEX.rose}`; }
+
+  const m=$('eventModal'); m.classList.remove('hidden'); m.classList.add('flex');
+  const f=$('flipCard'); f.classList.remove('revealed');
+  setTimeout(()=>f.classList.add('revealed'),450);
+  setTimeout(()=>vb.style.opacity='1',1250);
+}
+
+function proceed(){
+  if(!pending) return;
+  const m=$('eventModal'); m.classList.add('hidden'); m.classList.remove('flex');
+  const c=pending.cell;
+  path.push(`${TREE[pending.node].title} · ${ENV[pending.env].n} → ${VERDICT[c.v].n}`);
+  const to=c.to;
+  if(c.v==='perish'){ pop=0; pending=null; renderPop(); showEnd(to); return; }
+  pop=Math.min(MAXPOP, pop + (c.dp!==undefined?c.dp:POPD[c.v]));
+  pending=null; renderPop();
+  if(pop<=0){ showEnd('ext_collapse'); return; }
+  if(TREE[to]) render(to); else showEnd(to);
+  updateEdgeCount();
+}
+
+function showEnd(id){
+  const e=END[id], dead=e.t==='멸종', col=dead?HEX.rose:HEX.emerald;
+  $('endBadge').style.cssText=`background:${col}26;border-color:${col}4d;color:${col}`;
+  $('endIcon').className=`fa-solid ${e.i}`;
+  $('endTag').textContent=dead?'멸종':'생존';
+  $('endTag').style.cssText=`background:${col}26;color:${col};border:1px solid ${col}4d`;
+  $('endTitle').textContent=e.n;
+  $('endDesc').textContent=e.d;
+  $('endPath').innerHTML=`<p class="font-semibold text-slate-300 mb-1">지나온 길 · 최종 개체군 ${Math.max(0,Math.round(pop))}</p>`+path.map(p=>`<p>· ${p}</p>`).join('');
+  const opts=[...reached].filter(r=>r!=='pikaia');
+  if(opts.length){
+    $('ckWrap').classList.remove('hidden');
+    $('ckSelect').innerHTML=opts.map(r=>`<option value="${r}">${TREE[r].title} · ${TREE[r].era}</option>`).join('');
+  } else $('ckWrap').classList.add('hidden');
+  const m=$('endModal'); m.classList.remove('hidden'); m.classList.add('flex');
+}
+
+function restart(from){
+  const m=$('endModal'); m.classList.add('hidden'); m.classList.remove('flex');
+  pop = from ? 50 : 100; path=[]; runEdges.clear(); render(from||'pikaia');
+}
+
+/* ── 스와이프 (포인터 이벤트 단일 경로) ─────────────── */
+/* 하단 버튼을 없앴으므로 배지가 선택지를 확인하는 유일한 수단이다.
+   더 일찍(12px), 더 빨리(60px에 완전 불투명) 드러나게 한다. */
+const BADGE_MIN=12, BADGE_FULL=60, SWIPE_THRESHOLD=80;
+let sx=0,cx=0,drag=false,pid=null;
+const card=$('swipeCard');
+
+card.addEventListener('pointerdown',e=>{
+  if(locked||e.button!==0) return;
+  drag=true; pid=e.pointerId; sx=cx=e.clientX;
+  card.classList.remove('anim');
+  try{card.setPointerCapture(pid)}catch(_){}
+});
+card.addEventListener('pointermove',e=>{
+  if(!drag||e.pointerId!==pid) return;
+  cx=e.clientX; const d=cx-sx;
+  card.style.transform=`translateX(${d}px) rotate(${d*.07}deg)`;
+  $('badgeL').style.opacity=d<-BADGE_MIN?Math.min(-d/BADGE_FULL,1):0;
+  $('badgeR').style.opacity=d>BADGE_MIN?Math.min(d/BADGE_FULL,1):0;
+});
+const release=e=>{
+  if(!drag||e.pointerId!==pid) return;
+  drag=false; try{card.releasePointerCapture(pid)}catch(_){}
+  pid=null; const d=cx-sx; sx=cx=0;
+  if(d<-SWIPE_THRESHOLD) fly('L'); else if(d>SWIPE_THRESHOLD) fly('R'); else resetCard();
+};
+card.addEventListener('pointerup',release);
+card.addEventListener('pointercancel',e=>{drag=false;pid=null;sx=cx=0;resetCard()});
+
+function fly(side){
+  if(locked) return;
+  locked=true; drag=false; pid=null;
+  $('badgeL').style.opacity='0'; $('badgeR').style.opacity='0';   // 배지는 카드 바깥에 있어 따로 걷는다
+  card.classList.add('anim');
+  card.style.transform=`translateX(${side==='L'?'-120vw':'120vw'}) rotate(${side==='L'?-25:25}deg)`;
+  card.style.opacity='0';
+  setTimeout(()=>choose(side),260);
+}
+
+$('contBtn').onclick=proceed;
+$('restartBtn').onclick=()=>restart();
+$('ckBtn').onclick=()=>restart($('ckSelect').value);
+
+window.addEventListener('keydown',e=>{
+  if(!$('tutModal').classList.contains('hidden')) return;   // 튜토리얼이 위를 덮고 있으면 게임 단축키를 막는다
+  const evOpen=!$('eventModal').classList.contains('hidden');
+  const endOpen=!$('endModal').classList.contains('hidden');
+  if(evOpen){ if(e.key==='Enter'||e.key===' '){e.preventDefault();proceed();} return; }
+  if(endOpen){ if(e.key==='Enter'){restart();} return; }
+  const treeOpen=!$('treeModal').classList.contains('hidden');
+  const dataOpen=!$('dataModal').classList.contains('hidden');
+  if(treeOpen||dataOpen){ if(e.key==='Escape') shut(treeOpen?'treeModal':'dataModal'); return; }
+  if(e.key==='ArrowLeft')fly('L'); if(e.key==='ArrowRight')fly('R');
+});
+
+const open=(m)=>{$(m).classList.remove('hidden');$(m).classList.add('flex')};
+const shut=(m)=>{$(m).classList.add('hidden');$(m).classList.remove('flex')};
+$('openData').onclick=()=>{$('logCount').textContent=`(${log.length}줄)`;open('dataModal')};
+$('closeData').onclick=()=>shut('dataModal');
+
+/* ── 계통도 ──────────────────────────────────────────
+   발견한 가지만으로 매번 배치를 다시 계산한다.
+   x = 뿌리로부터의 최장 거리, y = 잎을 차례로 깔고 부모는 자식들의 가운데.
+   멸종 엔딩은 여러 계통에서 재등장하므로 「부모>엔딩」으로 가지마다 따로 세운다. */
+const NODE_W=170, NODE_H=64, COL_W=210, ROW_H=72, PAD=28;
+const isEndV=v=>v.indexOf('>')>=0;
+const endIdOf=v=>v.slice(v.indexOf('>')+1);
+
+function treeGraph(){
+  const edges=[...foundEdges()].map(k=>{
+    const [from,trait,to]=k.split('|');
+    const n=TREE[from];
+    const envIdx=n.envs.findIndex(e=>n.pay[trait][e]&&n.pay[trait][e].to===to);
+    return {key:k, from, trait, to,
+            toV: TREE[to]?to:`${from}>${to}`,
+            label: n.L.trait===trait?n.L.label:n.R.label,
+            rank: (n.L.trait===trait?0:1)*100 + (envIdx<0?99:envIdx)};
+  });
+
+  const kids={}, verts=new Set(['pikaia']);
+  edges.forEach(e=>{ (kids[e.from]=kids[e.from]||[]).push(e); verts.add(e.from); verts.add(e.toV); });
+  Object.values(kids).forEach(a=>a.sort((p,q)=>p.rank-q.rank));
+
+  // 깊이 = 뿌리로부터의 최장 경로. 합류 지점이 앞 열로 당겨지지 않게 한다
+  const dep={pikaia:0};
+  for(let i=0;i<=verts.size;i++){
+    let changed=false;
+    edges.forEach(e=>{
+      if(dep[e.from]===undefined) return;
+      const d=dep[e.from]+1;
+      if(dep[e.toV]===undefined||d>dep[e.toV]){ dep[e.toV]=d; changed=true; }
+    });
+    if(!changed) break;
+  }
+
+  const ypos={}, busy=new Set(); let slot=0;
+  function place(v){
+    if(ypos[v]!==undefined) return ypos[v];
+    if(busy.has(v)) return null;              // 합류 가지로 되돌아온 경우
+    busy.add(v);
+    const ks=kids[v]||[];
+    let r;
+    if(!ks.length) r=slot++;
+    else{
+      const ys=ks.map(e=>place(e.toV)).filter(n=>n!==null);
+      r = ys.length ? (Math.min(...ys)+Math.max(...ys))/2 : slot++;
+    }
+    busy.delete(v);
+    return ypos[v]=r;
+  }
+  place('pikaia');
+  verts.forEach(v=>{ if(ypos[v]===undefined||dep[v]===undefined){ ypos[v]=slot++; dep[v]=dep[v]||0; } });
+
+  // 어떤 형질을 골라 이 지점에 닿았는지
+  const caps={};
+  edges.forEach(e=>{ (caps[e.toV]=caps[e.toV]||new Set()).add(e.label); });
+
+  return {edges, verts:[...verts], dep, ypos, caps};
+}
+
+function renderTree(){
+  const {edges, verts, dep, ypos, caps}=treeGraph();
+  const X=v=>PAD+dep[v]*COL_W, Y=v=>PAD+ypos[v]*ROW_H;
+  const W=PAD*2+Math.max(...verts.map(v=>dep[v]))*COL_W+NODE_W;
+  const H=PAD*2+Math.max(...verts.map(v=>ypos[v]))*ROW_H+NODE_H;
+
+  // 이번 판 경로를 나중에 그려 위에 얹는다
+  const ordered=[...edges].sort((a,b)=>(runEdges.has(a.key)?1:0)-(runEdges.has(b.key)?1:0));
+  const paths=ordered.map(e=>{
+    const px=X(e.from)+NODE_W, py=Y(e.from)+NODE_H/2;
+    const cx=X(e.toV),         cy=Y(e.toV)+NODE_H/2;
+    const sx=px+Math.max(14,Math.min(30,(cx-px)/2));
+    const on=runEdges.has(e.key);
+    return `<path d="M${px},${py} H${sx} V${cy} H${cx}" fill="none" stroke="${on?HEX.emerald:'#334155'}" stroke-width="${on?3.5:2}" stroke-linecap="round" stroke-linejoin="round"${on?' opacity="0.95"':''}/>`;
+  }).join('');
+
+  const svg=$('treeSvg');
+  svg.setAttribute('width',W); svg.setAttribute('height',H);
+  svg.innerHTML=paths;
+
+  const cards=verts.map(v=>{
+    const cap=caps[v]?[...caps[v]].join(' / '):'';
+    let icon,title,tone,tag='';
+    if(isEndV(v)){
+      const e=END[endIdOf(v)], dead=e.t==='멸종';
+      icon=e.i; title=e.n;
+      tone = dead ? 'bg-rose-500/12 border-rose-500/45 text-rose-200'
+                  : 'bg-emerald-500/12 border-emerald-500/45 text-emerald-200';
+      tag=`<span class="shrink-0 text-[9px] font-bold px-1.5 py-0.5 rounded ${dead?'bg-rose-500/25 text-rose-300':'bg-emerald-500/25 text-emerald-300'}">${dead?'멸종':'생존'}</span>`;
+    } else {
+      const n=TREE[v];
+      icon=n.icon; title=n.title;
+      tone='bg-slate-800/90 border-slate-600 text-slate-100';
+    }
+    const here = !isEndV(v) && v===node;
+    return `<div class="absolute rounded-xl border px-2.5 py-1.5 flex flex-col justify-center gap-1 ${tone}${here?' ring-2 ring-emerald-400 shadow-lg shadow-emerald-500/20':''}"
+       style="left:${X(v)}px;top:${Y(v)}px;width:${NODE_W}px;height:${NODE_H}px" title="${cap?cap.replace(/"/g,'&quot;')+' → ':''}${title}">
+      ${cap?`<p class="text-[9px] leading-[1.25] text-slate-400 overflow-hidden" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical">${cap}</p>`:''}
+      <div class="flex items-center gap-1.5 min-w-0">
+        ${here?`<i class="fa-solid fa-circle-dot text-[11px] shrink-0 text-emerald-400"></i>`
+              :`<i class="fa-solid ${icon} text-[11px] shrink-0 ${isEndV(v)?'':'text-emerald-400'}"></i>`}
+        <span class="text-[11px] font-bold leading-tight truncate flex-1">${title}</span>
+        ${tag}
+      </div>
+    </div>`;
+  }).join('');
+
+  const box=$('treeNodes');
+  box.style.width=W+'px'; box.style.height=H+'px';
+  box.innerHTML=cards;
+
+  // 열었을 때 처음 눈이 갈 곳 — 지금 서 있는 지점, 없으면 뿌리
+  const focus = verts.indexOf(node)>=0 ? node : 'pikaia';
+  tFocusX=X(focus); tFocusY=Y(focus)+NODE_H/2;
+
+  $('treeCount').textContent=`${edges.length} / ${ALL_EDGES.size}`;
+  $('treeHint').textContent = edges.length
+    ? '끌어서 이동 · 휠이나 두 손가락으로 확대'
+    : '아직 갈래가 없습니다. 형질을 골라 계통을 뻗어보십시오.';
+  return {W,H};
+}
+
+/* 팬·줌 */
+let tScale=1,tX=0,tY=0,tW=1,tH=1,tFocusX=0,tFocusY=0;
+const applyT=()=>{ $('treeStage').style.transform=`translate(${tX}px,${tY}px) scale(${tScale})`; };
+const center=r=>{
+  if(tW*tScale<r.width)  tX=(r.width -tW*tScale)/2;
+  if(tH*tScale<r.height) tY=(r.height-tH*tScale)/2;
+};
+
+/* 「맞춤」 — 전체 모양을 한눈에. 좁은 화면에선 글자가 작아지는 것을 감수한다 */
+function fitTree(){
+  const r=$('treeViewport').getBoundingClientRect();
+  if(!r.width||!r.height) return;
+  tScale=Math.min(r.width/tW, r.height/tH, 1.4)*0.92;
+  tX=(r.width-tW*tScale)/2; tY=(r.height-tH*tScale)/2;
+  applyT();
+}
+
+/* 열었을 때의 첫 화면 — 전체를 욱여넣지 않고, 읽을 수 있는 배율로 현재 위치를 비춘다 */
+function homeTree(){
+  const r=$('treeViewport').getBoundingClientRect();
+  if(!r.width||!r.height) return;
+  const raw=Math.min(r.width/tW, r.height/tH)*0.92;
+  tScale=Math.min(1.2, Math.max(raw, .72));
+  tX=r.width/2 -(tFocusX+NODE_W/2)*tScale;
+  tY=r.height/2- tFocusY*tScale;
+  tX=Math.min(24, Math.max(tX, r.width -tW*tScale-24));
+  tY=Math.min(24, Math.max(tY, r.height-tH*tScale-24));
+  center(r); applyT();
+}
+function zoomAt(f,px,py){
+  const ns=Math.max(.15,Math.min(3,tScale*f));
+  tX=px-(px-tX)*(ns/tScale); tY=py-(py-tY)*(ns/tScale);
+  tScale=ns; applyT();
+}
+
+const vp=$('treeViewport');
+const ptrs=new Map(); let pinch=0;
+vp.addEventListener('pointerdown',e=>{
+  ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  try{vp.setPointerCapture(e.pointerId)}catch(_){}
+});
+vp.addEventListener('pointermove',e=>{
+  const prev=ptrs.get(e.pointerId); if(!prev) return;
+  ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  if(ptrs.size===1){ tX+=e.clientX-prev.x; tY+=e.clientY-prev.y; applyT(); return; }
+  if(ptrs.size===2){
+    const [a,b]=[...ptrs.values()], d=Math.hypot(a.x-b.x,a.y-b.y);
+    if(pinch){ const r=vp.getBoundingClientRect(); zoomAt(d/pinch,(a.x+b.x)/2-r.left,(a.y+b.y)/2-r.top); }
+    pinch=d;
+  }
+});
+const dropPtr=e=>{ ptrs.delete(e.pointerId); if(ptrs.size<2) pinch=0; };
+vp.addEventListener('pointerup',dropPtr);
+vp.addEventListener('pointercancel',dropPtr);
+vp.addEventListener('wheel',e=>{
+  e.preventDefault();
+  const r=vp.getBoundingClientRect();
+  zoomAt(e.deltaY<0?1.12:1/1.12, e.clientX-r.left, e.clientY-r.top);
+},{passive:false});
+
+$('openTree').onclick=()=>{
+  const d=renderTree(); tW=d.W; tH=d.H;
+  open('treeModal');
+  requestAnimationFrame(()=>requestAnimationFrame(homeTree));
+};
+$('closeTree').onclick=()=>shut('treeModal');
+$('treeFit').onclick=fitTree;
+$('treeIn').onclick=()=>{ const r=vp.getBoundingClientRect(); zoomAt(1.25,r.width/2,r.height/2); };
+$('treeOut').onclick=()=>{ const r=vp.getBoundingClientRect(); zoomAt(1/1.25,r.width/2,r.height/2); };
+
+/* ── 수업 데이터 ────────────────────────────────────── */
+$('applySeed').onclick=()=>{
+  const v=parseInt($('seedInput').value);
+  if(isNaN(v)){$('copyMsg').textContent='숫자를 입력하십시오.';return}
+  seed=v; rng=mulberry32(seed); $('seedLabel').textContent=seed;
+  $('copyMsg').textContent=`시드 ${seed} 적용. 처음부터 다시 시작합니다.`;
+  shut('endModal'); pop=100; path=[]; runEdges.clear(); render('pikaia');
+};
+$('copyLog').onclick=()=>{
+  navigator.clipboard.writeText(JSON.stringify(log,null,1))
+    .then(()=>$('copyMsg').textContent='복사했습니다.')
+    .catch(()=>$('copyMsg').textContent='복사에 실패했습니다. CSV로 내려받으십시오.');
+};
+$('dlLog').onclick=()=>{
+  const csv='\uFEFF노드,형질,환경,판정,시드\n'+log.map(r=>[r.node,r.trait,r.env,r.verdict,r.seed].map(x=>`"${x}"`).join(',')).join('\n');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+  a.download=`evo_swipe_${seed}.csv`; a.click();
+  $('copyMsg').textContent='내려받았습니다.';
+};
+$('clearLog').onclick=()=>{log=[];$('logCount').textContent='(0줄)';$('copyMsg').textContent='기록을 비웠습니다.'};
+
+/* ── 튜토리얼 ────────────────────────────────────────
+   게임 상태(pop·path·log·seen·rng)에 일절 접근하지 않는다.
+   접점은 오버레이를 여닫는 것뿐이므로, 몇 번을 반복해도
+   플레이 기록과 시드 추첨 순서가 오염되지 않는다. */
+const TUT=[...document.querySelectorAll('.tut-step')];
+const TUT_LAST=TUT.length-1;
+const TUT_NEXT_LABEL=['시작하기','다음','다음','다음','게임 시작'];
+let tutStep=0, tutPassed=false;
+
+$('tutDots').innerHTML=TUT.map(()=>'<span></span>').join('');
+
+function tutRender(){
+  TUT.forEach((s,i)=>{ s.style.display = i===tutStep ? 'flex' : 'none'; });
+  [...$('tutDots').children].forEach((d,i)=>{
+    d.className=`h-1.5 rounded-full transition-all ${i===tutStep?'w-5 bg-emerald-400':'w-1.5 bg-slate-700'}`;
+  });
+  $('tutPrev').disabled = tutStep===0;
+  $('tutNext').textContent = TUT_NEXT_LABEL[tutStep];
+  $('tutNext').disabled = tutStep===TUT_LAST && !tutPassed;
+  if(tutStep===TUT_LAST) tutResetPractice();
+}
+
+/* 연습 카드 — 실제 스와이프와 동일한 감각, 별도 DOM·별도 핸들러 */
+const tcard=$('tutCard');
+let tsx=0,tcx=0,tdrag=false,tpid=null,tlock=false;
+
+function tutCardHome(anim){
+  tcard.classList.toggle('anim',!!anim);
+  tcard.style.transform='translateX(0) rotate(0)';
+  tcard.style.opacity='1';
+  $('tutBadgeL').style.opacity='0'; $('tutBadgeR').style.opacity='0';
+}
+function tutResetPractice(){
+  tutCardHome(false);
+  tlock=false; tdrag=false; tpid=null; tsx=tcx=0;
+  $('tutDone').style.opacity = tutPassed?'1':'0';
+  $('tutHand').classList.toggle('hidden', tutPassed);
+}
+function tutPass(side){
+  if(tlock) return;
+  tlock=true; tdrag=false; tpid=null;
+  $('tutHand').classList.add('hidden');
+  $('tutBadgeL').style.opacity='0'; $('tutBadgeR').style.opacity='0';
+  tcard.classList.add('anim');
+  tcard.style.transform=`translateX(${side==='L'?'-120vw':'120vw'}) rotate(${side==='L'?-25:25}deg)`;
+  tcard.style.opacity='0';
+  tutPassed=true;
+  $('tutDone').style.opacity='1';
+  $('tutNext').disabled=false;
+}
+
+tcard.addEventListener('pointerdown',e=>{
+  if(tlock||e.button!==0) return;
+  tdrag=true; tpid=e.pointerId; tsx=tcx=e.clientX;
+  tcard.classList.remove('anim');
+  $('tutHand').classList.add('hidden');
+  try{tcard.setPointerCapture(tpid)}catch(_){}
+});
+tcard.addEventListener('pointermove',e=>{
+  if(!tdrag||e.pointerId!==tpid) return;
+  tcx=e.clientX; const d=tcx-tsx;
+  tcard.style.transform=`translateX(${d}px) rotate(${d*.07}deg)`;
+  $('tutBadgeL').style.opacity=d<-BADGE_MIN?Math.min(-d/BADGE_FULL,1):0;
+  $('tutBadgeR').style.opacity=d>BADGE_MIN?Math.min(d/BADGE_FULL,1):0;
+});
+tcard.addEventListener('pointerup',e=>{
+  if(!tdrag||e.pointerId!==tpid) return;
+  tdrag=false; try{tcard.releasePointerCapture(tpid)}catch(_){}
+  tpid=null; const d=tcx-tsx; tsx=tcx=0;
+  if(d<-SWIPE_THRESHOLD) tutPass('L');
+  else if(d>SWIPE_THRESHOLD) tutPass('R');
+  else tutCardHome(true);
+});
+tcard.addEventListener('pointercancel',()=>{tdrag=false;tpid=null;tsx=tcx=0;tutCardHome(true)});
+
+function tutOpen(){ tutStep=0; const m=$('tutModal'); m.classList.remove('hidden'); m.classList.add('flex'); tutRender(); }
+function tutClose(){ const m=$('tutModal'); m.classList.add('hidden'); m.classList.remove('flex'); }
+
+$('tutNext').onclick=()=>{ if(tutStep===TUT_LAST) tutClose(); else { tutStep++; tutRender(); } };
+$('tutPrev').onclick=()=>{ if(tutStep>0){ tutStep--; tutRender(); } };
+$('tutSkip').onclick=tutClose;
+$('openTut').onclick=tutOpen;
+
+window.addEventListener('keydown',e=>{
+  if($('tutModal').classList.contains('hidden')) return;
+  if(e.key==='Escape'){ e.preventDefault(); tutClose(); return; }
+  if(e.key==='Enter'||e.key===' '){ e.preventDefault(); if(!$('tutNext').disabled) $('tutNext').click(); return; }
+  if(e.key!=='ArrowLeft'&&e.key!=='ArrowRight') return;
+  e.preventDefault();
+  if(tutStep===TUT_LAST){ tutPass(e.key==='ArrowLeft'?'L':'R'); return; }   // 실습 스텝은 키보드로도 통과
+  if(e.key==='ArrowLeft') $('tutPrev').click(); else $('tutNext').click();
+});
+
+/* 게임 화면을 먼저 완성해 두고 그 위를 튜토리얼이 덮는다.
+   건너뛰기를 누르면 곧바로 플레이할 수 있다. */
+render('pikaia');
+tutOpen();
+</script>
+</body>
+</html>
