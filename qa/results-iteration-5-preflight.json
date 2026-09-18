@@ -1,0 +1,541 @@
+{
+  "label": "iteration-5-preflight",
+  "baselineDirectory": "C:\\Users\\22\\AppData\\Local\\Temp\\evo-swipe-presentation-baseline-20260919",
+  "checks": {
+    "baselineHash:index.html": true,
+    "baselineHash:evolution_swipe.html": true,
+    "gameScriptByteExact": true,
+    "legacyByteExact": true,
+    "originalIdsAndTags": true,
+    "uniqueIds": true,
+    "dataContract": true,
+    "tutorialSections": true,
+    "standaloneResources": true,
+    "differential:initial": true,
+    "differential:engine": true,
+    "differential:pointers": true,
+    "differential:exports": true,
+    "differential:storageKeys": true,
+    "noCandidateJsErrors": true,
+    "offlineNoRequests": true,
+    "normalRouletteDifferential": true,
+    "normalRouletteOrder": true,
+    "normalRouletteAlignment": true,
+    "candidateStableDuringAudit": true
+  },
+  "failures": [],
+  "gameScriptSha256": "9c3811e53c153c817b7398d8bdf26b62053e8b17adb402fcdc4149c1c0d72107",
+  "gameScriptBytes": 46376,
+  "fileBytes": {
+    "index.html": 195994,
+    "evolution_swipe.html": 35248
+  },
+  "candidateSha256": {
+    "index.html": "946e945bf2593195011ea339d9d5516e97dd43b6fd80e4b269ac2783ab33c062",
+    "evolution_swipe.html": "66fd0cc18f56f43934da83d9a8da30dab8766d77d5d9b8cf53cfbfeb7de273ec"
+  },
+  "originalIdCount": 71,
+  "candidateExternalResources": [],
+  "baselineBrowser": {
+    "pageErrors": [],
+    "networkRequests": [
+      "https://cdn.tailwindcss.com/",
+      "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css",
+      "https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css"
+    ],
+    "loadMs": 257.9,
+    "engineSuiteMs": 4000.4
+  },
+  "candidateBrowser": {
+    "pageErrors": [],
+    "networkRequests": [],
+    "loadMs": 66.0,
+    "engineSuiteMs": 4045.6
+  },
+  "coverage": {
+    "nodes": 10,
+    "environments": 15,
+    "endings": 17,
+    "payoffs": 60,
+    "branches": 32,
+    "transactions": 360,
+    "seededRoutes": 64
+  },
+  "differentialSha256": {
+    "original": "753f38340ba27c271c327b2b97f7e72841638efff3ad2748ff759717a254a694",
+    "candidate": "753f38340ba27c271c327b2b97f7e72841638efff3ad2748ff759717a254a694"
+  },
+  "ui": [
+    {
+      "mobile": false,
+      "tutorialVisible": true,
+      "tutorialSkipped": true,
+      "cardBounds": {
+        "x": 384,
+        "y": 272.296875,
+        "width": 512,
+        "height": 496
+      },
+      "noHorizontalOverflow": true,
+      "cardHitTarget": true,
+      "realSwipe": {
+        "trait": "agility",
+        "env": "anoxia",
+        "node": "pikaia",
+        "pop": 100,
+        "rows": 1
+      },
+      "resultNoHorizontalOverflow": true,
+      "resultOverflowMetrics": {
+        "viewport": 1280,
+        "documentScrollWidth": 1280,
+        "bodyScrollWidth": 1280
+      },
+      "continueVisible": true,
+      "proceeded": {
+        "node": "jawed_fish",
+        "pop": 120,
+        "pending": null,
+        "rows": 1
+      },
+      "treeVisible": true,
+      "seedApplied": {
+        "seed": 7,
+        "node": "pikaia",
+        "pop": 100
+      },
+      "keyboardProceeded": true,
+      "pageErrors": [],
+      "networkRequests": []
+    },
+    {
+      "mobile": true,
+      "tutorialVisible": true,
+      "tutorialSkipped": true,
+      "cardBounds": {
+        "x": 15,
+        "y": 226.640625,
+        "width": 360,
+        "height": 440
+      },
+      "noHorizontalOverflow": true,
+      "cardHitTarget": true,
+      "realSwipe": {
+        "trait": "agility",
+        "env": "anoxia",
+        "node": "pikaia",
+        "pop": 100,
+        "rows": 1
+      },
+      "resultNoHorizontalOverflow": true,
+      "resultOverflowMetrics": {
+        "viewport": 390,
+        "documentScrollWidth": 390,
+        "bodyScrollWidth": 405
+      },
+      "continueVisible": true,
+      "proceeded": {
+        "node": "jawed_fish",
+        "pop": 120,
+        "pending": null,
+        "rows": 1
+      },
+      "treeVisible": true,
+      "seedApplied": {
+        "seed": 7,
+        "node": "pikaia",
+        "pop": 100
+      },
+      "keyboardProceeded": true,
+      "pageErrors": [],
+      "networkRequests": []
+    }
+  ],
+  "normalMotionRoulette": {
+    "original": {
+      "stages": [
+        "chosen",
+        "spin",
+        "environment",
+        "verdict"
+      ],
+      "before": {
+        "node": "pikaia",
+        "pop": 100,
+        "log": 1,
+        "pending": "anoxia",
+        "rot": 0
+      },
+      "after": {
+        "node": "pikaia",
+        "pop": 100,
+        "log": 1,
+        "pending": "anoxia",
+        "rot": 1600.8,
+        "actual": 160.79999999999995,
+        "expected": 160.79999999999995,
+        "winningFill": "#10b981",
+        "environmentOpacity": "1",
+        "verdictOpacity": "1"
+      },
+      "timing": [
+        {
+          "label": "chosen",
+          "ms": 20.399999998509884
+        },
+        {
+          "label": "spin",
+          "ms": 242.79999999701977
+        },
+        {
+          "label": "environment",
+          "ms": 2804.099999997765
+        },
+        {
+          "label": "verdict",
+          "ms": 3265.39999999851
+        }
+      ],
+      "performance": {
+        "frameSamples": 203,
+        "medianFrameMs": 16.699999999999818,
+        "p95FrameMs": 16.700000000000273,
+        "maxFrameMs": 16.800000000000182,
+        "longTasksMs": [],
+        "longTaskDetails": [],
+        "frameGaps": []
+      }
+    },
+    "candidate": {
+      "stages": [
+        "chosen",
+        "spin",
+        "environment",
+        "verdict"
+      ],
+      "before": {
+        "node": "pikaia",
+        "pop": 100,
+        "log": 1,
+        "pending": "anoxia",
+        "rot": 0
+      },
+      "after": {
+        "node": "pikaia",
+        "pop": 100,
+        "log": 1,
+        "pending": "anoxia",
+        "rot": 1600.8,
+        "actual": 160.79999999999995,
+        "expected": 160.79999999999995,
+        "winningFill": "#10b981",
+        "environmentOpacity": "1",
+        "verdictOpacity": "1"
+      },
+      "timing": [
+        {
+          "label": "chosen",
+          "ms": 3.800000000745058
+        },
+        {
+          "label": "spin",
+          "ms": 224.40000000223517
+        },
+        {
+          "label": "environment",
+          "ms": 2790.5
+        },
+        {
+          "label": "verdict",
+          "ms": 3256.400000002235
+        }
+      ],
+      "performance": {
+        "frameSamples": 200,
+        "medianFrameMs": 16.699999999999818,
+        "p95FrameMs": 16.700000000000273,
+        "maxFrameMs": 50.00000000000003,
+        "longTasksMs": [],
+        "longTaskDetails": [],
+        "frameGaps": [
+          {
+            "atMs": 55.40000000074508,
+            "durationMs": 50.00000000000003
+          }
+        ]
+      }
+    }
+  },
+  "normalMotionRepeatedSamples": [
+    {
+      "stages": [
+        "chosen",
+        "spin",
+        "environment",
+        "verdict"
+      ],
+      "before": {
+        "node": "pikaia",
+        "pop": 100,
+        "log": 1,
+        "pending": "anoxia",
+        "rot": 0
+      },
+      "after": {
+        "node": "pikaia",
+        "pop": 100,
+        "log": 1,
+        "pending": "anoxia",
+        "rot": 1600.8,
+        "actual": 160.79999999999995,
+        "expected": 160.79999999999995,
+        "winningFill": "#10b981",
+        "environmentOpacity": "1",
+        "verdictOpacity": "1"
+      },
+      "timing": [
+        {
+          "label": "chosen",
+          "ms": 3.800000000745058
+        },
+        {
+          "label": "spin",
+          "ms": 224.40000000223517
+        },
+        {
+          "label": "environment",
+          "ms": 2790.5
+        },
+        {
+          "label": "verdict",
+          "ms": 3256.400000002235
+        }
+      ],
+      "performance": {
+        "frameSamples": 200,
+        "medianFrameMs": 16.699999999999818,
+        "p95FrameMs": 16.700000000000273,
+        "maxFrameMs": 50.00000000000003,
+        "longTasksMs": [],
+        "longTaskDetails": [],
+        "frameGaps": [
+          {
+            "atMs": 55.40000000074508,
+            "durationMs": 50.00000000000003
+          }
+        ]
+      }
+    },
+    {
+      "stages": [
+        "chosen",
+        "spin",
+        "environment",
+        "verdict"
+      ],
+      "before": {
+        "node": "pikaia",
+        "pop": 100,
+        "log": 1,
+        "pending": "anoxia",
+        "rot": 0
+      },
+      "after": {
+        "node": "pikaia",
+        "pop": 100,
+        "log": 1,
+        "pending": "anoxia",
+        "rot": 1600.8,
+        "actual": 160.79999999999995,
+        "expected": 160.79999999999995,
+        "winningFill": "#10b981",
+        "environmentOpacity": "1",
+        "verdictOpacity": "1"
+      },
+      "timing": [
+        {
+          "label": "chosen",
+          "ms": 2.800000000745058
+        },
+        {
+          "label": "spin",
+          "ms": 224.69999999925494
+        },
+        {
+          "label": "environment",
+          "ms": 2783.89999999851
+        },
+        {
+          "label": "verdict",
+          "ms": 3255.599999997765
+        }
+      ],
+      "performance": {
+        "frameSamples": 201,
+        "medianFrameMs": 16.699999999999818,
+        "p95FrameMs": 16.799999999999727,
+        "maxFrameMs": 33.30000000000001,
+        "longTasksMs": [],
+        "longTaskDetails": [],
+        "frameGaps": []
+      }
+    },
+    {
+      "stages": [
+        "chosen",
+        "spin",
+        "environment",
+        "verdict"
+      ],
+      "before": {
+        "node": "pikaia",
+        "pop": 100,
+        "log": 1,
+        "pending": "anoxia",
+        "rot": 0
+      },
+      "after": {
+        "node": "pikaia",
+        "pop": 100,
+        "log": 1,
+        "pending": "anoxia",
+        "rot": 1600.8,
+        "actual": 160.79999999999995,
+        "expected": 160.79999999999995,
+        "winningFill": "#10b981",
+        "environmentOpacity": "1",
+        "verdictOpacity": "1"
+      },
+      "timing": [
+        {
+          "label": "chosen",
+          "ms": 3.199999999254942
+        },
+        {
+          "label": "spin",
+          "ms": 229.59999999776483
+        },
+        {
+          "label": "environment",
+          "ms": 2783.7999999970198
+        },
+        {
+          "label": "verdict",
+          "ms": 3249
+        }
+      ],
+      "performance": {
+        "frameSamples": 201,
+        "medianFrameMs": 16.699999999999818,
+        "p95FrameMs": 16.799999999999955,
+        "maxFrameMs": 49.946000000000026,
+        "longTasksMs": [
+          57
+        ],
+        "longTaskDetails": [
+          {
+            "startMs": 3.599999997764826,
+            "durationMs": 57,
+            "name": "self",
+            "attribution": [
+              {
+                "containerType": "window",
+                "containerName": ""
+              }
+            ]
+          }
+        ],
+        "frameGaps": [
+          {
+            "atMs": 48.79999999701977,
+            "durationMs": 49.946000000000026
+          }
+        ]
+      }
+    }
+  ],
+  "shortScreenScrolling": [
+    {
+      "viewport": [
+        320,
+        568
+      ],
+      "tutorialSteps": [
+        {
+          "step": 0,
+          "visible": true,
+          "nextVisible": true
+        },
+        {
+          "step": 1,
+          "visible": true,
+          "nextVisible": true
+        },
+        {
+          "step": 2,
+          "visible": true,
+          "nextVisible": true
+        },
+        {
+          "step": 3,
+          "visible": true,
+          "nextVisible": true
+        },
+        {
+          "step": 4,
+          "visible": true,
+          "nextVisible": true
+        }
+      ],
+      "tutorialClosed": true,
+      "endingVisible": true,
+      "checkpointAfterActualClick": {
+        "node": "jawed_fish",
+        "pop": 50,
+        "endClosed": true
+      }
+    },
+    {
+      "viewport": [
+        844,
+        390
+      ],
+      "tutorialSteps": [
+        {
+          "step": 0,
+          "visible": true,
+          "nextVisible": true
+        },
+        {
+          "step": 1,
+          "visible": true,
+          "nextVisible": true
+        },
+        {
+          "step": 2,
+          "visible": true,
+          "nextVisible": true
+        },
+        {
+          "step": 3,
+          "visible": true,
+          "nextVisible": true
+        },
+        {
+          "step": 4,
+          "visible": true,
+          "nextVisible": true
+        }
+      ],
+      "tutorialClosed": true,
+      "endingVisible": true,
+      "checkpointAfterActualClick": {
+        "node": "jawed_fish",
+        "pop": 50,
+        "endClosed": true
+      }
+    }
+  ],
+  "pass": true,
+  "verifiedSnapshot": "C:\\Users\\22\\AppData\\Local\\Temp\\evo-swipe-presentation-baseline-20260919\\verified-iteration-5-preflight.html"
+}

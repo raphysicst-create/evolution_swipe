@@ -1,0 +1,506 @@
+{
+  "label": "iteration-4",
+  "baselineDirectory": "C:\\Users\\22\\AppData\\Local\\Temp\\evo-swipe-presentation-baseline-20260919",
+  "checks": {
+    "baselineHash:index.html": true,
+    "baselineHash:evolution_swipe.html": true,
+    "gameScriptByteExact": true,
+    "legacyByteExact": true,
+    "originalIdsAndTags": true,
+    "uniqueIds": true,
+    "dataContract": true,
+    "tutorialSections": true,
+    "standaloneResources": true,
+    "differential:initial": true,
+    "differential:engine": true,
+    "differential:pointers": true,
+    "differential:exports": true,
+    "differential:storageKeys": true,
+    "noCandidateJsErrors": true,
+    "offlineNoRequests": true,
+    "normalRouletteDifferential": true,
+    "normalRouletteOrder": true,
+    "normalRouletteAlignment": true,
+    "candidateStableDuringAudit": true
+  },
+  "failures": [],
+  "gameScriptSha256": "9c3811e53c153c817b7398d8bdf26b62053e8b17adb402fcdc4149c1c0d72107",
+  "gameScriptBytes": 46376,
+  "fileBytes": {
+    "index.html": 191186,
+    "evolution_swipe.html": 35248
+  },
+  "candidateSha256": {
+    "index.html": "fb29ee6bea8219f951dc406ce27d58b498f3ad0506c51a96d6cd77c57ef07680",
+    "evolution_swipe.html": "66fd0cc18f56f43934da83d9a8da30dab8766d77d5d9b8cf53cfbfeb7de273ec"
+  },
+  "originalIdCount": 71,
+  "candidateExternalResources": [],
+  "baselineBrowser": {
+    "pageErrors": [],
+    "networkRequests": [
+      "https://cdn.tailwindcss.com/",
+      "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css",
+      "https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css"
+    ],
+    "loadMs": 400.0,
+    "engineSuiteMs": 4209.2
+  },
+  "candidateBrowser": {
+    "pageErrors": [],
+    "networkRequests": [],
+    "loadMs": 216.6,
+    "engineSuiteMs": 3270.3
+  },
+  "coverage": {
+    "nodes": 10,
+    "environments": 15,
+    "endings": 17,
+    "payoffs": 60,
+    "branches": 32,
+    "transactions": 360,
+    "seededRoutes": 64
+  },
+  "differentialSha256": {
+    "original": "753f38340ba27c271c327b2b97f7e72841638efff3ad2748ff759717a254a694",
+    "candidate": "753f38340ba27c271c327b2b97f7e72841638efff3ad2748ff759717a254a694"
+  },
+  "ui": [
+    {
+      "mobile": false,
+      "tutorialVisible": true,
+      "tutorialSkipped": true,
+      "cardBounds": {
+        "x": 384,
+        "y": 272.296875,
+        "width": 512,
+        "height": 496
+      },
+      "noHorizontalOverflow": true,
+      "cardHitTarget": true,
+      "realSwipe": {
+        "trait": "agility",
+        "env": "anoxia",
+        "node": "pikaia",
+        "pop": 100,
+        "rows": 1
+      },
+      "resultNoHorizontalOverflow": true,
+      "resultOverflowMetrics": {
+        "viewport": 1280,
+        "documentScrollWidth": 1280,
+        "bodyScrollWidth": 1280
+      },
+      "continueVisible": true,
+      "proceeded": {
+        "node": "jawed_fish",
+        "pop": 120,
+        "pending": null,
+        "rows": 1
+      },
+      "treeVisible": true,
+      "seedApplied": {
+        "seed": 7,
+        "node": "pikaia",
+        "pop": 100
+      },
+      "keyboardProceeded": true,
+      "pageErrors": [],
+      "networkRequests": []
+    },
+    {
+      "mobile": true,
+      "tutorialVisible": true,
+      "tutorialSkipped": true,
+      "cardBounds": {
+        "x": 15,
+        "y": 226.640625,
+        "width": 360,
+        "height": 440
+      },
+      "noHorizontalOverflow": true,
+      "cardHitTarget": true,
+      "realSwipe": {
+        "trait": "agility",
+        "env": "anoxia",
+        "node": "pikaia",
+        "pop": 100,
+        "rows": 1
+      },
+      "resultNoHorizontalOverflow": true,
+      "resultOverflowMetrics": {
+        "viewport": 390,
+        "documentScrollWidth": 390,
+        "bodyScrollWidth": 390
+      },
+      "continueVisible": true,
+      "proceeded": {
+        "node": "jawed_fish",
+        "pop": 120,
+        "pending": null,
+        "rows": 1
+      },
+      "treeVisible": true,
+      "seedApplied": {
+        "seed": 7,
+        "node": "pikaia",
+        "pop": 100
+      },
+      "keyboardProceeded": true,
+      "pageErrors": [],
+      "networkRequests": []
+    }
+  ],
+  "normalMotionRoulette": {
+    "original": {
+      "stages": [
+        "chosen",
+        "spin",
+        "environment",
+        "verdict"
+      ],
+      "before": {
+        "node": "pikaia",
+        "pop": 100,
+        "log": 1,
+        "pending": "anoxia",
+        "rot": 0
+      },
+      "after": {
+        "node": "pikaia",
+        "pop": 100,
+        "log": 1,
+        "pending": "anoxia",
+        "rot": 1600.8,
+        "actual": 160.79999999999995,
+        "expected": 160.79999999999995,
+        "winningFill": "#10b981",
+        "environmentOpacity": "1",
+        "verdictOpacity": "1"
+      },
+      "timing": [
+        {
+          "label": "chosen",
+          "ms": 21.199999999254942
+        },
+        {
+          "label": "spin",
+          "ms": 243.19999999925494
+        },
+        {
+          "label": "environment",
+          "ms": 2816
+        },
+        {
+          "label": "verdict",
+          "ms": 3264
+        }
+      ],
+      "performance": {
+        "frameSamples": 203,
+        "medianFrameMs": 16.699999999999818,
+        "p95FrameMs": 16.799999999999727,
+        "maxFrameMs": 33.40000000000009,
+        "longTasksMs": [],
+        "longTaskDetails": [],
+        "frameGaps": []
+      }
+    },
+    "candidate": {
+      "stages": [
+        "chosen",
+        "spin",
+        "environment",
+        "verdict"
+      ],
+      "before": {
+        "node": "pikaia",
+        "pop": 100,
+        "log": 1,
+        "pending": "anoxia",
+        "rot": 0
+      },
+      "after": {
+        "node": "pikaia",
+        "pop": 100,
+        "log": 1,
+        "pending": "anoxia",
+        "rot": 1600.8,
+        "actual": 160.79999999999995,
+        "expected": 160.79999999999995,
+        "winningFill": "#10b981",
+        "environmentOpacity": "1",
+        "verdictOpacity": "1"
+      },
+      "timing": [
+        {
+          "label": "chosen",
+          "ms": 4.399999998509884
+        },
+        {
+          "label": "spin",
+          "ms": 226.30000000074506
+        },
+        {
+          "label": "environment",
+          "ms": 2797.599999997765
+        },
+        {
+          "label": "verdict",
+          "ms": 3246.699999999255
+        }
+      ],
+      "performance": {
+        "frameSamples": 201,
+        "medianFrameMs": 16.699999999999818,
+        "p95FrameMs": 16.799999999999727,
+        "maxFrameMs": 50.03999999999999,
+        "longTasksMs": [
+          52
+        ],
+        "longTaskDetails": [
+          {
+            "startMs": 4.800000000745058,
+            "durationMs": 52,
+            "name": "self",
+            "attribution": [
+              {
+                "containerType": "window",
+                "containerName": ""
+              }
+            ]
+          }
+        ],
+        "frameGaps": [
+          {
+            "atMs": 45.799999997764814,
+            "durationMs": 50.03999999999999
+          }
+        ]
+      }
+    }
+  },
+  "normalMotionRepeatedSamples": [
+    {
+      "stages": [
+        "chosen",
+        "spin",
+        "environment",
+        "verdict"
+      ],
+      "before": {
+        "node": "pikaia",
+        "pop": 100,
+        "log": 1,
+        "pending": "anoxia",
+        "rot": 0
+      },
+      "after": {
+        "node": "pikaia",
+        "pop": 100,
+        "log": 1,
+        "pending": "anoxia",
+        "rot": 1600.8,
+        "actual": 160.79999999999995,
+        "expected": 160.79999999999995,
+        "winningFill": "#10b981",
+        "environmentOpacity": "1",
+        "verdictOpacity": "1"
+      },
+      "timing": [
+        {
+          "label": "chosen",
+          "ms": 4.399999998509884
+        },
+        {
+          "label": "spin",
+          "ms": 226.30000000074506
+        },
+        {
+          "label": "environment",
+          "ms": 2797.599999997765
+        },
+        {
+          "label": "verdict",
+          "ms": 3246.699999999255
+        }
+      ],
+      "performance": {
+        "frameSamples": 201,
+        "medianFrameMs": 16.699999999999818,
+        "p95FrameMs": 16.799999999999727,
+        "maxFrameMs": 50.03999999999999,
+        "longTasksMs": [
+          52
+        ],
+        "longTaskDetails": [
+          {
+            "startMs": 4.800000000745058,
+            "durationMs": 52,
+            "name": "self",
+            "attribution": [
+              {
+                "containerType": "window",
+                "containerName": ""
+              }
+            ]
+          }
+        ],
+        "frameGaps": [
+          {
+            "atMs": 45.799999997764814,
+            "durationMs": 50.03999999999999
+          }
+        ]
+      }
+    },
+    {
+      "stages": [
+        "chosen",
+        "spin",
+        "environment",
+        "verdict"
+      ],
+      "before": {
+        "node": "pikaia",
+        "pop": 100,
+        "log": 1,
+        "pending": "anoxia",
+        "rot": 0
+      },
+      "after": {
+        "node": "pikaia",
+        "pop": 100,
+        "log": 1,
+        "pending": "anoxia",
+        "rot": 1600.8,
+        "actual": 160.79999999999995,
+        "expected": 160.79999999999995,
+        "winningFill": "#10b981",
+        "environmentOpacity": "1",
+        "verdictOpacity": "1"
+      },
+      "timing": [
+        {
+          "label": "chosen",
+          "ms": 4
+        },
+        {
+          "label": "spin",
+          "ms": 227.5
+        },
+        {
+          "label": "environment",
+          "ms": 2789.599999997765
+        },
+        {
+          "label": "verdict",
+          "ms": 3249.199999999255
+        }
+      ],
+      "performance": {
+        "frameSamples": 200,
+        "medianFrameMs": 16.699999999999818,
+        "p95FrameMs": 16.799999999999955,
+        "maxFrameMs": 66.70000000000002,
+        "longTasksMs": [
+          62
+        ],
+        "longTaskDetails": [
+          {
+            "startMs": 4.399999998509884,
+            "durationMs": 62,
+            "name": "self",
+            "attribution": [
+              {
+                "containerType": "window",
+                "containerName": ""
+              }
+            ]
+          }
+        ],
+        "frameGaps": [
+          {
+            "atMs": 64.60000000074507,
+            "durationMs": 66.70000000000002
+          }
+        ]
+      }
+    },
+    {
+      "stages": [
+        "chosen",
+        "spin",
+        "environment",
+        "verdict"
+      ],
+      "before": {
+        "node": "pikaia",
+        "pop": 100,
+        "log": 1,
+        "pending": "anoxia",
+        "rot": 0
+      },
+      "after": {
+        "node": "pikaia",
+        "pop": 100,
+        "log": 1,
+        "pending": "anoxia",
+        "rot": 1600.8,
+        "actual": 160.79999999999995,
+        "expected": 160.79999999999995,
+        "winningFill": "#10b981",
+        "environmentOpacity": "1",
+        "verdictOpacity": "1"
+      },
+      "timing": [
+        {
+          "label": "chosen",
+          "ms": 4.800000000745058
+        },
+        {
+          "label": "spin",
+          "ms": 231.89999999850988
+        },
+        {
+          "label": "environment",
+          "ms": 2797.699999999255
+        },
+        {
+          "label": "verdict",
+          "ms": 3248
+        }
+      ],
+      "performance": {
+        "frameSamples": 201,
+        "medianFrameMs": 16.699999999999818,
+        "p95FrameMs": 16.700000000000273,
+        "maxFrameMs": 49.93399999999997,
+        "longTasksMs": [
+          56
+        ],
+        "longTaskDetails": [
+          {
+            "startMs": 5.099999997764826,
+            "durationMs": 56,
+            "name": "self",
+            "attribution": [
+              {
+                "containerType": "window",
+                "containerName": ""
+              }
+            ]
+          }
+        ],
+        "frameGaps": [
+          {
+            "atMs": 45.89999999999998,
+            "durationMs": 49.93399999999997
+          }
+        ]
+      }
+    }
+  ],
+  "pass": true,
+  "verifiedSnapshot": "C:\\Users\\22\\AppData\\Local\\Temp\\evo-swipe-presentation-baseline-20260919\\verified-iteration-4.html"
+}

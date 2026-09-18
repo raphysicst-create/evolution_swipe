@@ -1,0 +1,65 @@
+[
+  {
+    "node": "pikaia",
+    "title": "원시 척삭동물 (피카이아)",
+    "icon": "fa-solid fa-worm",
+    "art": 1875
+  },
+  {
+    "node": "placoderm",
+    "title": "갑주어",
+    "icon": "fa-solid fa-shield-halved",
+    "art": 2151
+  },
+  {
+    "node": "jawed_fish",
+    "title": "원시 유턱어류",
+    "icon": "fa-solid fa-fish",
+    "art": 2476
+  },
+  {
+    "node": "tiktaalik",
+    "title": "육기어류 (틱타알릭)",
+    "icon": "fa-solid fa-frog",
+    "art": 2531
+  },
+  {
+    "node": "amphibian",
+    "title": "고대 양서류",
+    "icon": "fa-solid fa-paw",
+    "art": 2473
+  },
+  {
+    "node": "amniote",
+    "title": "원시 양막류",
+    "icon": "fa-solid fa-egg",
+    "art": 2359
+  },
+  {
+    "node": "synapsid",
+    "title": "단궁류 (포유류 조상)",
+    "icon": "fa-solid fa-cat",
+    "art": 2523
+  },
+  {
+    "node": "mammal",
+    "title": "원시 포유류",
+    "icon": "fa-solid fa-hippo",
+    "art": 2520
+  },
+  {
+    "node": "diapsid",
+    "title": "석형류 (파충류·공룡 조상)",
+    "icon": "fa-solid fa-staff-snake",
+    "art": 2550
+  },
+  {
+    "node": "dinosaur",
+    "title": "공룡",
+    "icon": "fa-solid fa-dragon",
+    "art": 2349
+  },
+  {
+    "unknownArtBytes": 1963
+  }
+]
