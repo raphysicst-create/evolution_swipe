@@ -1,0 +1,35 @@
+[
+  {
+    "viewport": "desktop",
+    "width": 1440,
+    "errors": [],
+    "card": {
+      "x": 464,
+      "y": 272.296875,
+      "width": 512,
+      "height": 496
+    }
+  },
+  {
+    "viewport": "mobile",
+    "width": 390,
+    "errors": [],
+    "card": {
+      "x": 15,
+      "y": 226.640625,
+      "width": 360,
+      "height": 440
+    }
+  },
+  {
+    "viewport": "small",
+    "width": 320,
+    "errors": [],
+    "card": {
+      "x": 15,
+      "y": 213.3125,
+      "width": 290,
+      "height": 424
+    }
+  }
+]

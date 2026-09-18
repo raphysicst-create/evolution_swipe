@@ -1,0 +1,135 @@
+{
+  "label": "iteration-1",
+  "baselineDirectory": "C:\\Users\\22\\AppData\\Local\\Temp\\evo-swipe-presentation-baseline-20260919",
+  "checks": {
+    "baselineHash:index.html": true,
+    "baselineHash:evolution_swipe.html": true,
+    "gameScriptByteExact": true,
+    "legacyByteExact": true,
+    "originalIdsAndTags": true,
+    "uniqueIds": true,
+    "dataContract": true,
+    "tutorialSections": true,
+    "standaloneResources": true,
+    "differential:initial": true,
+    "differential:engine": true,
+    "differential:pointers": true,
+    "differential:exports": true,
+    "differential:storageKeys": true,
+    "noCandidateJsErrors": true,
+    "offlineNoRequests": true
+  },
+  "failures": [],
+  "gameScriptSha256": "9c3811e53c153c817b7398d8bdf26b62053e8b17adb402fcdc4149c1c0d72107",
+  "gameScriptBytes": 46376,
+  "fileBytes": {
+    "index.html": 103052,
+    "evolution_swipe.html": 35248
+  },
+  "originalIdCount": 71,
+  "candidateExternalResources": [],
+  "baselineBrowser": {
+    "pageErrors": [],
+    "networkRequests": [
+      "https://cdn.tailwindcss.com/",
+      "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css",
+      "https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css"
+    ],
+    "loadMs": 338.4,
+    "engineSuiteMs": 4951.3
+  },
+  "candidateBrowser": {
+    "pageErrors": [],
+    "networkRequests": [],
+    "loadMs": 70.9,
+    "engineSuiteMs": 3101.6
+  },
+  "coverage": {
+    "nodes": 10,
+    "environments": 15,
+    "endings": 17,
+    "payoffs": 60,
+    "branches": 32,
+    "transactions": 360,
+    "seededRoutes": 64
+  },
+  "differentialSha256": {
+    "original": "753f38340ba27c271c327b2b97f7e72841638efff3ad2748ff759717a254a694",
+    "candidate": "753f38340ba27c271c327b2b97f7e72841638efff3ad2748ff759717a254a694"
+  },
+  "ui": [
+    {
+      "mobile": false,
+      "tutorialVisible": true,
+      "tutorialSkipped": true,
+      "cardBounds": {
+        "x": 432,
+        "y": 305.140625,
+        "width": 416,
+        "height": 420
+      },
+      "noHorizontalOverflow": true,
+      "cardHitTarget": true,
+      "realSwipe": {
+        "trait": "agility",
+        "env": "anoxia",
+        "node": "pikaia",
+        "pop": 100,
+        "rows": 1
+      },
+      "continueVisible": true,
+      "proceeded": {
+        "node": "jawed_fish",
+        "pop": 120,
+        "pending": null,
+        "rows": 1
+      },
+      "treeVisible": true,
+      "seedApplied": {
+        "seed": 7,
+        "node": "pikaia",
+        "pop": 100
+      },
+      "keyboardProceeded": true,
+      "pageErrors": [],
+      "networkRequests": []
+    },
+    {
+      "mobile": true,
+      "tutorialVisible": true,
+      "tutorialSkipped": true,
+      "cardBounds": {
+        "x": 16,
+        "y": 275.46875,
+        "width": 358,
+        "height": 420
+      },
+      "noHorizontalOverflow": true,
+      "cardHitTarget": true,
+      "realSwipe": {
+        "trait": "agility",
+        "env": "anoxia",
+        "node": "pikaia",
+        "pop": 100,
+        "rows": 1
+      },
+      "continueVisible": true,
+      "proceeded": {
+        "node": "jawed_fish",
+        "pop": 120,
+        "pending": null,
+        "rows": 1
+      },
+      "treeVisible": true,
+      "seedApplied": {
+        "seed": 7,
+        "node": "pikaia",
+        "pop": 100
+      },
+      "keyboardProceeded": true,
+      "pageErrors": [],
+      "networkRequests": []
+    }
+  ],
+  "pass": true
+}
